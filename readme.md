@@ -1,3 +1,102 @@
+# Research Canvas with Google Gemini
+
+一个使用Google Gemini模型的研究助手应用程序。此项目基于CopilotKit的CoAgents框架，支持使用Google Gemini 1.5 Pro模型进行交互。
+
+## 功能特点
+
+- 使用Google Gemini 1.5 Pro模型进行自然语言处理
+- 前端使用Next.js和React构建的现代UI
+- 后端使用FastAPI和LangGraph处理请求
+- 支持多种模型切换（OpenAI、Anthropic、Google Gemini）
+
+## 架构
+
+项目由两个主要部分组成：
+
+- `agent/`：包含后端代码，使用Python和FastAPI
+- `ui/`：包含前端代码，使用Next.js和React
+
+## 环境要求
+
+- Python 3.12+
+- Node.js 18+
+- Poetry
+- npm/pnpm
+
+## 环境变量
+
+在项目根目录创建一个`.env`文件，包含以下环境变量：
+
+```
+MODEL=google_genai
+GOOGLE_API_KEY=你的Google API密钥
+TAVILY_API_KEY=你的Tavily API密钥（用于搜索功能）
+```
+
+## 安装与运行
+
+### 后端
+
+1. 进入`agent`目录：
+   ```bash
+   cd agent
+   ```
+
+2. 使用Poetry安装依赖：
+   ```bash
+   poetry install
+   ```
+
+3. 启动后端服务器：
+   ```bash
+   poetry run uvicorn research_canvas.demo:app --host 0.0.0.0 --port 8000
+   ```
+
+### 前端
+
+1. 进入`ui`目录：
+   ```bash
+   cd ui
+   ```
+
+2. 安装依赖：
+   ```bash
+   npm install
+   # 或
+   pnpm install
+   ```
+
+3. 启动开发服务器：
+   ```bash
+   npm run dev
+   # 或
+   pnpm dev
+   ```
+
+4. 在浏览器中访问`http://localhost:3000`
+
+## 使用方法
+
+1. 在前端界面底部选择"Google Generative AI"模型
+2. 使用聊天界面与代理进行交互
+3. 代理将使用Google Gemini模型处理您的请求并提供响应
+
+## API端点
+
+- `/health`：健康检查端点（GET）
+- `/copilotkit`：CopilotKit集成的主要端点（POST）
+- `/gemini`：测试Gemini模型的简单端点（POST）
+- `/test_gemini`：直接测试Gemini模型的端点（POST）
+
+## 定制与扩展
+
+如果需要添加新功能或修改现有功能，可以编辑以下文件：
+
+- `agent/research_canvas/demo.py`：主要的后端入口点
+- `agent/research_canvas/langgraph/model.py`：模型配置和选择
+- `ui/src/app/api/copilotkit/route.ts`：前端API路由
+- `ui/src/app/page.tsx`：前端主页面
+
 # CoAgents Research Canvas Example
 
 This example demonstrates a research canvas UI.
