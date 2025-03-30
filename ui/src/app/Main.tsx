@@ -4,6 +4,7 @@ import { AgentState } from "@/lib/types";
 import { useCoAgent } from "@copilotkit/react-core";
 import { CopilotChat } from "@copilotkit/react-ui";
 import { useCopilotChatSuggestions } from "@copilotkit/react-ui";
+import { Logo } from "@/components/Logo";
 
 export default function Main() {
   const { model, agent } = useModelSelectorContext();
@@ -25,6 +26,7 @@ export default function Main() {
   return (
     <>
       <h1 className="flex h-[60px] bg-[#0E103D] text-white items-center px-10 text-2xl font-medium">
+        <Logo size="sm" className="mr-3" />
         Research Helper
       </h1>
 
