@@ -4,6 +4,7 @@ import { useCoAgent } from "@copilotkit/react-core";
 import { CopilotChat } from "@copilotkit/react-ui";
 import { useCopilotChatSuggestions } from "@copilotkit/react-ui";
 import { Logo } from "@/components/Logo";
+import { useState, useEffect } from "react";
 
 export default function Main() {
   const model = "google_genai";
@@ -20,25 +21,39 @@ export default function Main() {
     },
   });
 
+  // 添加响应式布局状态
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 检测窗口大小并更新isMobile状态
+  useEffect(() => {
+    const checkWindowSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkWindowSize();
+    window.addEventListener('resize', checkWindowSize);
+    return () => window.removeEventListener('resize', checkWindowSize);
+  }, []);
+
   useCopilotChatSuggestions({
     instructions: "Lifespan of penguins",
   });
 
   return (
     <>
-      <h1 className="flex h-[60px] bg-[#111111] text-white items-center px-10 text-2xl font-medium">
+      <h1 className="flex h-[60px] bg-[#111111] text-white items-center px-4 md:px-10 text-xl md:text-2xl font-medium">
         <Logo size="sm" className="mr-3" />
       </h1>
 
       <div
-        className="flex flex-1"
+        className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1`}
         style={{ height: "calc(100vh - 60px)" }}
       >
-        <div className="flex-1 overflow-hidden">
+        <div className={`${isMobile ? 'h-[50vh]' : 'flex-1'} overflow-hidden`}>
           <ResearchCanvas />
         </div>
         <div
-          className="w-[500px] h-full flex-shrink-0"
+          className={`${isMobile ? 'w-full h-[50vh]' : 'w-[500px] h-full'} flex-shrink-0`}
           style={
             {
               "--copilot-kit-background-color": "#1a1a1e",

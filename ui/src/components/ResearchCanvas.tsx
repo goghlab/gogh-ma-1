@@ -13,10 +13,10 @@ import { EditResourceDialog } from "./EditResourceDialog";
 import { AddResourceDialog } from "./AddResourceDialog";
 import { Resources } from "./Resources";
 import { AgentState, Resource } from "@/lib/types";
-import { useModelSelectorContext } from "@/lib/model-selector-provider";
 
 export function ResearchCanvas() {
-  const { model, agent } = useModelSelectorContext();
+  const model = "google_genai";
+  const agent = "research_agent_google_genai";
 
   const { state, setState } = useCoAgent<AgentState>({
     name: agent,
@@ -134,10 +134,10 @@ export function ResearchCanvas() {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-10 bg-[#F5F8FF]">
-      <div className="space-y-8 pb-10">
+    <div className="w-full h-full overflow-y-auto p-4 md:p-10 bg-[#1e1e20]">
+      <div className="space-y-6 md:space-y-8 pb-6 md:pb-10">
         <div>
-          <h2 className="text-lg font-medium mb-3 text-primary">
+          <h2 className="text-base md:text-lg font-medium mb-2 md:mb-3 text-zinc-200">
             Research Question
           </h2>
           <Input
@@ -147,13 +147,13 @@ export function ResearchCanvas() {
               setState({ ...state, research_question: e.target.value })
             }
             aria-label="Research question"
-            className="bg-background px-6 py-8 border-0 shadow-none rounded-xl text-md font-extralight focus-visible:ring-0 placeholder:text-slate-400"
+            className="bg-[#2e2e32] px-4 md:px-6 py-6 md:py-8 border-0 shadow-none rounded-lg md:rounded-xl text-sm md:text-md font-extralight focus-visible:ring-0 placeholder:text-zinc-500 text-zinc-200"
           />
         </div>
 
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium text-primary">Resources</h2>
+          <div className="flex justify-between items-center mb-3 md:mb-4">
+            <h2 className="text-base md:text-lg font-medium text-zinc-200">Resources</h2>
             <EditResourceDialog
               isOpen={isEditResourceOpen}
               onOpenChange={setIsEditResourceOpen}
@@ -170,7 +170,7 @@ export function ResearchCanvas() {
             />
           </div>
           {resources.length === 0 && (
-            <div className="text-sm text-slate-400">
+            <div className="text-xs md:text-sm text-zinc-500">
               Click the button above to add resources.
             </div>
           )}
@@ -185,7 +185,7 @@ export function ResearchCanvas() {
         </div>
 
         <div className="flex flex-col h-full">
-          <h2 className="text-lg font-medium mb-3 text-primary">
+          <h2 className="text-base md:text-lg font-medium mb-2 md:mb-3 text-zinc-200">
             Research Draft
           </h2>
           <Textarea
@@ -193,10 +193,10 @@ export function ResearchCanvas() {
             placeholder="Write your research draft here"
             value={state.report || ""}
             onChange={(e) => setState({ ...state, report: e.target.value })}
-            rows={10}
+            rows={8}
             aria-label="Research draft"
-            className="bg-background px-6 py-8 border-0 shadow-none rounded-xl text-md font-extralight focus-visible:ring-0 placeholder:text-slate-400"
-            style={{ minHeight: "200px" }}
+            className="bg-[#2e2e32] px-4 md:px-6 py-6 md:py-8 border-0 shadow-none rounded-lg md:rounded-xl text-sm md:text-md font-extralight focus-visible:ring-0 placeholder:text-zinc-500 text-zinc-200"
+            style={{ minHeight: "180px" }}
           />
         </div>
       </div>
