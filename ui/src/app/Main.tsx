@@ -1,5 +1,4 @@
 import { ResearchCanvas } from "@/components/ResearchCanvas";
-import { useModelSelectorContext } from "@/lib/model-selector-provider";
 import { AgentState } from "@/lib/types";
 import { useCoAgent } from "@copilotkit/react-core";
 import { CopilotChat } from "@copilotkit/react-ui";
@@ -7,7 +6,9 @@ import { useCopilotChatSuggestions } from "@copilotkit/react-ui";
 import { Logo } from "@/components/Logo";
 
 export default function Main() {
-  const { model, agent } = useModelSelectorContext();
+  const model = "google_genai";
+  const agent = "research_agent_google_genai";
+  
   const { state, setState } = useCoAgent<AgentState>({
     name: agent,
     initialState: {
@@ -25,13 +26,12 @@ export default function Main() {
 
   return (
     <>
-      <h1 className="flex h-[60px] bg-[#0E103D] text-white items-center px-10 text-2xl font-medium">
+      <h1 className="flex h-[60px] bg-[#111111] text-white items-center px-10 text-2xl font-medium">
         <Logo size="sm" className="mr-3" />
-        Research Helper
       </h1>
 
       <div
-        className="flex flex-1 border"
+        className="flex flex-1"
         style={{ height: "calc(100vh - 60px)" }}
       >
         <div className="flex-1 overflow-hidden">
@@ -41,12 +41,14 @@ export default function Main() {
           className="w-[500px] h-full flex-shrink-0"
           style={
             {
-              "--copilot-kit-background-color": "#E0E9FD",
-              "--copilot-kit-secondary-color": "#6766FC",
-              "--copilot-kit-separator-color": "#b8b8b8",
-              "--copilot-kit-primary-color": "#FFFFFF",
-              "--copilot-kit-contrast-color": "#000000",
-              "--copilot-kit-secondary-contrast-color": "#000",
+              "--copilot-kit-background-color": "#1a1a1e",
+              "--copilot-kit-secondary-color": "#2d2d30",
+              "--copilot-kit-separator-color": "#222225",
+              "--copilot-kit-primary-color": "#e4e4e7",
+              "--copilot-kit-contrast-color": "#ffffff",
+              "--copilot-kit-secondary-contrast-color": "#e4e4e7",
+              "--copilot-kit-user-input-bg-color": "#2a2a30",
+              "--copilot-kit-input-text-color": "#e0e0e0",
             } as any
           }
         >

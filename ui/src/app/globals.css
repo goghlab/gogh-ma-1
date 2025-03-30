@@ -86,7 +86,7 @@ body {
 }
 
 .copilotKitChat {
-  background-color: #e0e9fd;
+  background-color: var(--copilot-kit-background-color, #e0e9fd);
 }
 
 .copilotKitResponseButton {
@@ -96,7 +96,7 @@ body {
 }
 
 .copilotKitInput {
-  background-color: white;
+  background-color: var(--copilot-kit-user-input-bg-color, white);
 }
 
 .copilotKitMessageControlButton {
@@ -104,8 +104,8 @@ body {
 }
 
 .copilotKitInput > textarea {
-  background-color: white;
-  color: black;
+  background-color: var(--copilot-kit-user-input-bg-color, white);
+  color: var(--copilot-kit-input-text-color, black);
 }
 
 .copilotKitInput > .copilotKitInputControls > button:not([disabled]) {
