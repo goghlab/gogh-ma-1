@@ -78,11 +78,27 @@ body {
 }
 
 .copilotKitMessage.copilotKitUserMessage {
-  border-radius: 0.5rem 0.5rem 0 0.5rem;
+  border-radius: 12px 12px 4px 12px;
+  background-color: #4a4a65 !important;
+  color: #ffffff !important;
+  padding: 12px 16px !important;
+  margin: 8px 0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  max-width: 90% !important;
+  align-self: flex-end !important;
+  line-height: 1.5 !important;
 }
 
 .copilotKitMessage.copilotKitAssistantMessage {
-  border-radius: 0.5rem 0.5rem 0.5rem 0;
+  border-radius: 12px 12px 12px 4px;
+  background-color: #2d2d40 !important;
+  color: #ffffff !important;
+  padding: 12px 16px !important;
+  margin: 8px 0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  max-width: 90% !important;
+  align-self: flex-start !important;
+  line-height: 1.5 !important;
 }
 
 .copilotKitChat {
@@ -93,10 +109,24 @@ body {
   background-color: transparent;
   color: var(--copilot-kit-secondary-color);
   border: 0px;
+  transition: background-color 0.2s ease !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  background-color: rgba(93, 78, 255, 0.1) !important;
+  border: 1px solid rgba(93, 78, 255, 0.3) !important;
+  color: #9e97ff !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  margin: 4px !important;
+}
+
+.copilotKitResponseButton:hover {
+  background-color: rgba(93, 78, 255, 0.2) !important;
 }
 
 .copilotKitInput {
   background-color: var(--copilot-kit-user-input-bg-color, white);
+  border-radius: 8px !important;
 }
 
 .copilotKitMessageControlButton {
@@ -106,8 +136,131 @@ body {
 .copilotKitInput > textarea {
   background-color: var(--copilot-kit-user-input-bg-color, white);
   color: var(--copilot-kit-input-text-color, black);
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease !important;
+  font-size: 14px !important;
+}
+
+.copilotKitInput > textarea:focus {
+  border-color: #5D4EFF !important;
+  box-shadow: 0 0 0 2px rgba(93, 78, 255, 0.2) !important;
 }
 
 .copilotKitInput > .copilotKitInputControls > button:not([disabled]) {
   color: var(--copilot-kit-secondary-color);
+}
+
+/* 修复聊天框样式问题 */
+.copilot-chat input[type="text"], 
+.copilot-chat textarea,
+.copilotKitInput textarea,
+.copilotKitInput input {
+  color: #ffffff !important;
+  background-color: #2a2a30 !important;
+  border-color: #3a3a40 !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease !important;
+  font-size: 14px !important;
+}
+
+.copilot-chat input[type="text"]:focus, 
+.copilot-chat textarea:focus,
+.copilotKitInput textarea:focus,
+.copilotKitInput input:focus {
+  border-color: #5D4EFF !important;
+  box-shadow: 0 0 0 2px rgba(93, 78, 255, 0.2) !important;
+}
+
+.copilot-chat input[type="text"]::placeholder, 
+.copilot-chat textarea::placeholder,
+.copilotKitInput textarea::placeholder,
+.copilotKitInput input::placeholder {
+  color: #aaaaaa !important;
+  opacity: 0.8 !important;
+}
+
+.copilotKitMessageContent {
+  color: #ffffff !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+.copilotKitMessageContent a {
+  color: #8e8eff !important;
+  text-decoration: underline !important;
+  transition: color 0.2s ease !important;
+}
+
+.copilotKitMessageContent a:hover {
+  color: #a5a5ff !important;
+}
+
+.copilotKitChatFeedContent,
+.copilotKitChatFeed {
+  background-color: #1a1a1e !important;
+  padding: 16px !important;
+}
+
+.copilotKitChatFeed {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow-y: auto !important;
+}
+
+.copilotKitChatFeedContent {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.copilotKitChatHeader {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid #333 !important;
+  background-color: #1d1d22 !important;
+}
+
+.copilotKitInputWrapper {
+  padding: 16px !important;
+  background-color: #1d1d22 !important;
+  border-top: 1px solid #333 !important;
+}
+
+.copilotKitInputControls {
+  margin-top: 8px !important;
+}
+
+/* 滚动条样式 */
+.copilotKitChatFeed::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.copilotKitChatFeed::-webkit-scrollbar-track {
+  background: #1a1a1e !important;
+}
+
+.copilotKitChatFeed::-webkit-scrollbar-thumb {
+  background-color: rgba(93, 78, 255, 0.3) !important;
+  border-radius: 6px !important;
+}
+
+.copilotKitChatFeed::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(93, 78, 255, 0.5) !important;
+}
+
+.copilotKitTypingIndicator {
+  color: #9e97ff !important;
+  font-size: 13px !important;
+  padding: 4px 8px !important;
+}
+
+/* 让聊天消息整体居中对齐，但不同类型分列两边 */
+.copilotKitChatFeedContent > div {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
 }

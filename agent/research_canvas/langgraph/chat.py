@@ -37,6 +37,34 @@ def DeleteCampaign(campaign_id: str, confirmation_title: str): # pylint: disable
 def DeleteResources(urls: List[str]): # pylint: disable=invalid-name,unused-argument
     """Delete the URLs from the resources."""
 
+@tool
+def CreateNewCampaign(): # pylint: disable=invalid-name,unused-argument
+    """User chooses to create a new marketing campaign, use this tool to guide the creation process."""
+
+@tool
+def JustBrowsing(): # pylint: disable=invalid-name,unused-argument
+    """User chooses to just browse, not create a new campaign. Reply to confirm they can freely browse and ask for help anytime."""
+
+@tool
+def DefineTargetAudience(audience_description: str, age_range: str = ""): # pylint: disable=invalid-name,unused-argument
+    """Define the target audience for the marketing campaign. Can include age range information."""
+
+@tool
+def SelectAgeRange(age_range: str): # pylint: disable=invalid-name,unused-argument
+    """Select the target audience age range, such as: '18-24', '25-34', '35-44', '45-54', '55+'."""
+
+@tool
+def SetCampaignGoals(goals: str): # pylint: disable=invalid-name,unused-argument
+    """Set the goals for the marketing campaign."""
+
+@tool
+def SelectMarketingChannels(channels: str): # pylint: disable=invalid-name,unused-argument
+    """Select the channels for the marketing campaign."""
+
+@tool
+def SetCampaignBudget(budget: str): # pylint: disable=invalid-name,unused-argument
+    """Set the budget for the marketing campaign."""
+
 
 async def chat_node(state: AgentState, config: RunnableConfig) -> \
     Command[Literal["search_node", "chat_node", "delete_node", "__end__"]]:
@@ -87,6 +115,13 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> \
             CreateCampaign,
             DeleteCampaign,
             DeleteResources,
+            CreateNewCampaign,
+            JustBrowsing,
+            DefineTargetAudience,
+            SelectAgeRange,
+            SetCampaignGoals,
+            SelectMarketingChannels,
+            SetCampaignBudget,
         ],
         **ainvoke_kwargs  # Pass the kwargs conditionally
     ).ainvoke([
@@ -101,9 +136,62 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> \
             1. Yes, create a new campaign
             2. No, just browsing
             
-            If they choose to create a campaign, use the CreateCampaign tool to add a new campaign to their workspace.
+            If they choose "Yes, create a new campaign", use the CreateNewCampaign tool. Then use the CreateCampaign tool to add a new campaign to their workspace.
             Ask them for a campaign title and use it to create the campaign.
             
+            If they choose "No, just browsing", use the JustBrowsing tool, and tell them they can freely browse and ask for help anytime.
+            
+            # Special Message Handling
+            If the user sends a message containing "I need help customizing this campaign", DO NOT ask if they want to create a campaign again.
+            Instead, present them with options for customizing their campaign:
+            
+            1. Target Audience: Who are you trying to reach? Tell me about your ideal customer.
+            2. Campaign Goals: What do you want to achieve with this campaign? (e.g., increase website traffic, generate leads, boost sales)
+            3. Marketing Channels: Where will you reach your audience? (e.g., social media, email, search ads)
+            4. Campaign Budget: How much are you willing to spend?
+            
+            Then guide the user based on their selection:
+            
+            ## Target Audience
+            If they mention wanting to "define the target audience", use the DefineTargetAudience tool and help them identify their ideal customers.
+            First, offer them clickable options for age ranges:
+            - 18-24 years old
+            - 25-34 years old
+            - 35-44 years old
+            - 45-54 years old
+            - 55+ years old
+            
+            When they select an age range, use the SelectAgeRange tool. Then ask additional questions like:
+            - What gender demographic are you primarily targeting?
+            - What location or geographical area are you focusing on?
+            - What interests or behaviors do they have?
+            - What problems are they trying to solve?
+            
+            After collecting all this information, use the DefineTargetAudience tool with the complete description including the age range information.
+            
+            ## Campaign Goals
+            If they mention wanting to "set campaign goals", use the SetCampaignGoals tool and help them define specific, measurable goals.
+            Ask them questions like:
+            - Are you looking to increase brand awareness?
+            - Do you want to generate leads?
+            - Are you focused on direct sales?
+            - What metrics would indicate success?
+            
+            ## Marketing Channels
+            If they mention wanting to "choose marketing channels", use the SelectMarketingChannels tool and help them select the best platforms.
+            Ask them questions like:
+            - Where does your target audience spend time online?
+            - Which channels have worked well for you in the past?
+            - Do you prefer digital channels, traditional media, or a mix?
+            
+            ## Campaign Budget
+            If they mention wanting to "set a campaign budget", use the SetCampaignBudget tool and help them allocate resources effectively.
+            Ask them questions like:
+            - What's your total budget for this campaign?
+            - How do you want to distribute the budget across channels?
+            - Are there any cost constraints to be aware of?
+            
+            # Other Features
             If a user asks to delete a campaign:
             1. Ask them to confirm by typing the exact campaign title
             2. Only proceed with deletion if they correctly type the campaign title
@@ -225,6 +313,87 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> \
                         )]
                     }
                 )
+        if ai_message.tool_calls[0]["name"] == "CreateNewCampaign":
+            return Command(
+                goto="chat_node",
+                update={
+                    "messages": [ai_message, ToolMessage(
+                        tool_call_id=ai_message.tool_calls[0]["id"],
+                        content="Let's create a new marketing campaign. What would you like to name it?"
+                    )]
+                }
+            )
+        if ai_message.tool_calls[0]["name"] == "JustBrowsing":
+            return Command(
+                goto="chat_node",
+                update={
+                    "messages": [ai_message, ToolMessage(
+                        tool_call_id=ai_message.tool_calls[0]["id"],
+                        content="No problem! Feel free to browse. Let me know if you need any help."
+                    )]
+                }
+            )
+        if ai_message.tool_calls[0]["name"] == "DefineTargetAudience":
+            audience_description = ai_message.tool_calls[0]["args"]["audience_description"]
+            age_range = ai_message.tool_calls[0]["args"]["age_range"]
+            # Update target audience information
+            return Command(
+                goto="chat_node",
+                update={
+                    "messages": [ai_message, ToolMessage(
+                        tool_call_id=ai_message.tool_calls[0]["id"],
+                        content=f"Successfully defined target audience: {audience_description}, {age_range}"
+                    )]
+                }
+            )
+        if ai_message.tool_calls[0]["name"] == "SelectAgeRange":
+            age_range = ai_message.tool_calls[0]["args"]["age_range"]
+            # Update target audience age range
+            return Command(
+                goto="chat_node",
+                update={
+                    "messages": [ai_message, ToolMessage(
+                        tool_call_id=ai_message.tool_calls[0]["id"],
+                        content=f"Successfully selected target audience age range: {age_range}"
+                    )]
+                }
+            )
+        if ai_message.tool_calls[0]["name"] == "SetCampaignGoals":
+            goals = ai_message.tool_calls[0]["args"]["goals"]
+            # Update campaign goals
+            return Command(
+                goto="chat_node",
+                update={
+                    "messages": [ai_message, ToolMessage(
+                        tool_call_id=ai_message.tool_calls[0]["id"],
+                        content=f"Successfully set campaign goals: {goals}"
+                    )]
+                }
+            )
+        if ai_message.tool_calls[0]["name"] == "SelectMarketingChannels":
+            channels = ai_message.tool_calls[0]["args"]["channels"]
+            # Update marketing channels
+            return Command(
+                goto="chat_node",
+                update={
+                    "messages": [ai_message, ToolMessage(
+                        tool_call_id=ai_message.tool_calls[0]["id"],
+                        content=f"Successfully selected marketing channels: {channels}"
+                    )]
+                }
+            )
+        if ai_message.tool_calls[0]["name"] == "SetCampaignBudget":
+            budget = ai_message.tool_calls[0]["args"]["budget"]
+            # Update campaign budget
+            return Command(
+                goto="chat_node",
+                update={
+                    "messages": [ai_message, ToolMessage(
+                        tool_call_id=ai_message.tool_calls[0]["id"],
+                        content=f"Successfully set campaign budget: {budget}"
+                    )]
+                }
+            )
        
     goto = "__end__"
     if ai_message.tool_calls and ai_message.tool_calls[0]["name"] == "Search":

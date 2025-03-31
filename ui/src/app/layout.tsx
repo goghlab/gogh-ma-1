@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "@copilotkit/react-ui/styles.css";
 import "./globals.css";
@@ -15,9 +15,15 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "MA-1 Research Canvas",
-  description: "MA-1 Research Helper with Google Gemini",
-  viewport: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
+  title: "MA-1 Marketing Canvas",
+  description: "MA-1 Marketing Campaign Assistant with Google Gemini",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1.0,
+  maximumScale: 1.0,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -27,9 +33,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

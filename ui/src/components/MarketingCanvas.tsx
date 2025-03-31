@@ -12,21 +12,7 @@ import { Progress } from "./Progress";
 import { EditResourceDialog } from "./EditResourceDialog";
 import { AddResourceDialog } from "./AddResourceDialog";
 import { Resources } from "./Resources";
-import { AgentState, Resource, Campaign } from "@/lib/types";
-import { PlusCircle } from "lucide-react";
-
-// 活动卡片组件
-const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
-  return (
-    <div className="bg-[#2e2e32] p-6 rounded-xl cursor-pointer hover:bg-[#3a3a3f] transition-colors duration-200">
-      <h3 className="font-medium text-lg text-zinc-200 mb-2 truncate">{campaign.title}</h3>
-      <p className="text-zinc-400 text-sm mb-4 line-clamp-3">{campaign.brief}</p>
-      <div className="text-zinc-500 text-xs">
-        创建于 {new Date(campaign.createdAt).toLocaleDateString()}
-      </div>
-    </div>
-  );
-};
+import { AgentState, Resource } from "@/lib/types";
 
 export function MarketingCanvas() {
   const model = "google_genai";
@@ -36,11 +22,6 @@ export function MarketingCanvas() {
     name: agent,
     initialState: {
       model,
-      campaign_brief: "",
-      resources: [],
-      report: "",
-      logs: [],
-      campaigns: [],
     },
   });
 
@@ -75,7 +56,7 @@ export function MarketingCanvas() {
             Delete these resources?
           </div>
           <Resources
-            resources={state.resources.filter((resource) =>
+            resources={resources.filter((resource) =>
               (args.urls || []).includes(resource.url)
             )}
             customWidth={200}
@@ -102,7 +83,7 @@ export function MarketingCanvas() {
     },
   });
 
-  const resources = state.resources || [];
+  const resources: Resource[] = state.resources || [];
   const setResources = (resources: Resource[]) => {
     setState({ ...state, resources });
   };
@@ -151,32 +132,73 @@ export function MarketingCanvas() {
     }
   };
 
-  const campaigns = state.campaigns || [];
-
   return (
     <div className="w-full h-full overflow-y-auto p-4 md:p-10 bg-[#1e1e20]">
-      <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold text-zinc-100 mb-2">营销活动</h1>
-        <p className="text-zinc-400 text-sm">管理您的所有营销活动</p>
-      </div>
+      <div className="space-y-6 md:space-y-8 pb-6 md:pb-10">
+        <div>
+          <h2 className="text-base md:text-lg font-medium mb-2 md:mb-3 text-zinc-200">
+            Campaign Brief
+          </h2>
+          <Input
+            placeholder="Enter your campaign brief"
+            value={state.campaign_brief || ""}
+            onChange={(e) =>
+              setState({ ...state, campaign_brief: e.target.value })
+            }
+            aria-label="Campaign brief"
+            className="bg-[#2e2e32] px-4 md:px-6 py-6 md:py-8 border-0 shadow-none rounded-lg md:rounded-xl text-sm md:text-md font-extralight focus-visible:ring-0 placeholder:text-zinc-500 text-zinc-200"
+          />
+        </div>
 
-      {campaigns.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-center">
-          <div className="bg-[#2e2e32] w-16 h-16 rounded-full flex items-center justify-center mb-4">
-            <PlusCircle className="w-8 h-8 text-zinc-400" />
+        <div>
+          <div className="flex justify-between items-center mb-3 md:mb-4">
+            <h2 className="text-base md:text-lg font-medium text-zinc-200">References & Inspiration</h2>
+            <EditResourceDialog
+              isOpen={isEditResourceOpen}
+              onOpenChange={setIsEditResourceOpen}
+              editResource={editResource}
+              setEditResource={setEditResource}
+              updateResource={updateResource}
+            />
+            <AddResourceDialog
+              isOpen={isAddResourceOpen}
+              onOpenChange={setIsAddResourceOpen}
+              newResource={newResource}
+              setNewResource={setNewResource}
+              addResource={addResource}
+            />
           </div>
-          <h3 className="text-zinc-300 font-medium mb-2">没有活动</h3>
-          <p className="text-zinc-500 text-sm max-w-xs">
-            在右侧聊天界面与AI助手交流，创建您的第一个营销活动
-          </p>
+          {resources.length === 0 && (
+            <div className="text-xs md:text-sm text-zinc-500">
+              Click the button above to add references or inspiration.
+            </div>
+          )}
+
+          {resources.length !== 0 && (
+            <Resources
+              resources={resources}
+              handleCardClick={handleCardClick}
+              removeResource={removeResource}
+            />
+          )}
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {campaigns.map((campaign) => (
-            <CampaignCard key={campaign.id} campaign={campaign} />
-          ))}
+
+        <div className="flex flex-col h-full">
+          <h2 className="text-base md:text-lg font-medium mb-2 md:mb-3 text-zinc-200">
+            Campaign Draft
+          </h2>
+          <Textarea
+            data-test-id="campaign-draft"
+            placeholder="Write your campaign draft here"
+            value={state.report || ""}
+            onChange={(e) => setState({ ...state, report: e.target.value })}
+            rows={8}
+            aria-label="Campaign draft"
+            className="bg-[#2e2e32] px-4 md:px-6 py-6 md:py-8 border-0 shadow-none rounded-lg md:rounded-xl text-sm md:text-md font-extralight focus-visible:ring-0 placeholder:text-zinc-500 text-zinc-200"
+            style={{ minHeight: "180px" }}
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 } 

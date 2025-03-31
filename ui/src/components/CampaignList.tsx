@@ -101,30 +101,27 @@ interface CampaignListProps {
 export function CampaignList({ campaigns, onSelectCampaign, userChat, viewMode: externalViewMode }: CampaignListProps) {
   const [filter, setFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">(externalViewMode || "grid");
+  const [localCampaigns, setLocalCampaigns] = useState<Campaign[]>(campaigns);
+  
+  // 当外部campaigns变化时更新本地状态
+  React.useEffect(() => {
+    setLocalCampaigns(campaigns);
+  }, [campaigns]);
   
   const filteredCampaigns =
     filter === "all"
-      ? campaigns
-      : campaigns.filter(campaign => campaign.status === filter.toLowerCase());
+      ? localCampaigns
+      : localCampaigns.filter(campaign => campaign.status === filter.toLowerCase());
 
   const handleDelete = (campaign: Campaign) => {
-    // 发送删除请求到AI，触发确认流程
-    const chatElement = document.querySelector('.copilot-chat') as HTMLElement;
-    if (chatElement) {
-      const input = chatElement.querySelector('input') as HTMLInputElement;
-      if (input) {
-        input.value = `I want to delete the campaign "${campaign.title}" with ID ${campaign.id}`;
-        
-        // 模拟输入事件
-        const event = new Event('input', { bubbles: true });
-        input.dispatchEvent(event);
-        
-        // 模拟提交
-        setTimeout(() => {
-          const button = chatElement.querySelector('button[type="submit"]') as HTMLButtonElement;
-          if (button) button.click();
-        }, 100);
-      }
+    // 创建一个确认对话框
+    if (window.confirm(`Are you sure you want to delete the campaign "${campaign.title}"?`)) {
+      // 直接从本地状态中移除活动
+      const updatedCampaigns = localCampaigns.filter(c => c.id !== campaign.id);
+      setLocalCampaigns(updatedCampaigns);
+      
+      // 记录删除操作
+      console.log(`Deleted campaign: ${campaign.title} (ID: ${campaign.id})`);
     }
   };
 

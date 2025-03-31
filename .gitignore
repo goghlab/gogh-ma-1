@@ -11,7 +11,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/  # 注释掉这一行以允许ui/src/lib被添加
 lib64/
 parts/
 sdist/
@@ -34,8 +34,11 @@ coverage/
 # Environments
 .env
 .env.local
+.env.development
 .env.development.local
+.env.test
 .env.test.local
+.env.production
 .env.production.local
 .venv
 venv/
@@ -51,4 +54,8 @@ ENV/
 
 # Project specific
 *.log
-install.log 
+install.log
+
+# Vercel
+.vercel
+.next/cache 

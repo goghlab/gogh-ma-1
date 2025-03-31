@@ -111,53 +111,11 @@ async def custom_copilotkit_handler(request: Request):
     try:
         # 读取请求内容
         body_bytes = await request.body()
-        body_str = body_bytes.decode()
-        
-        # 记录完整的请求内容
-        print(f"Raw request body: {body_str}")
-        
-        try:
-            data = json.loads(body_str)
-        except json.JSONDecodeError as e:
-            print(f"JSON decode error: {str(e)}")
-            return {"error": f"Invalid JSON: {str(e)}"}
+        data = json.loads(body_bytes.decode())
         
         print(f"Received data in copilotkit: {data}")
         
-        # 处理工具调用结果
-        if "tool_call_id" in data:
-            print(f"Processing tool call result: {data}")
-            # 这是工具调用的结果，需要返回一个合适的响应
-            tool_call_id = data.get("tool_call_id")
-            result = data.get("content", "No result provided")
-            
-            response_data = {
-                "id": f"response-{tool_call_id}",
-                "object": "chat.completion",
-                "created": int(time.time()),
-                "model": "gemini-1.5-pro",
-                "choices": [
-                    {
-                        "index": 0,
-                        "message": {
-                            "role": "assistant",
-                            "content": f"以下是搜索结果：\n\n{result}\n\n让我为您总结一下这些信息。",
-                        },
-                        "finish_reason": "stop"
-                    }
-                ],
-                "usage": {
-                    "prompt_tokens": 0,
-                    "completion_tokens": 0,
-                    "total_tokens": 0
-                }
-            }
-            
-            # 使用JSONResponse以确保正确的Content-Type
-            from fastapi.responses import JSONResponse
-            return JSONResponse(content=response_data)
-        
-        # 标准请求处理
+        # 提取消息和代理名称
         messages = data.get("messages", [])
         agent_name = data.get("agent", "research_agent")
         tools = data.get("tools", [])  # 获取工具定义
@@ -166,14 +124,6 @@ async def custom_copilotkit_handler(request: Request):
         # 判断是否需要执行工具调用
         need_tool_call = (tool_choice != "none" and len(tools) > 0)
         
-        # 检查最后一条消息，如果是工具结果，不需要再做工具调用
-        last_msg_is_tool_result = False
-        if messages and len(messages) > 0:
-            last_msg = messages[-1]
-            if last_msg.get("role") == "tool" or "tool_call_id" in last_msg:
-                last_msg_is_tool_result = True
-                need_tool_call = False
-        
         # 确定使用哪个模型
         model_name = "google_genai" if agent_name == "research_agent_google_genai" else default_model
         print(f"Using model: {model_name} for agent: {agent_name}")
@@ -181,7 +131,7 @@ async def custom_copilotkit_handler(request: Request):
         # 使用选定的模型处理请求
         from research_canvas.langgraph.model import get_model
         from research_canvas.langgraph.state import AgentState
-        from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
+        from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
         
         # 从messages列表中提取和转换消息
         lc_messages = []
@@ -193,9 +143,6 @@ async def custom_copilotkit_handler(request: Request):
                 lc_messages.append(AIMessage(content=content))
             elif msg.get("role") == "system":
                 lc_messages.append(SystemMessage(content=content))
-            elif msg.get("role") == "tool":
-                tool_call_id = msg.get("tool_call_id", "unknown")
-                lc_messages.append(ToolMessage(content=content, tool_call_id=tool_call_id))
         
         if not lc_messages:
             return {"error": "No valid messages received"}
@@ -215,7 +162,7 @@ async def custom_copilotkit_handler(request: Request):
             ai_response = model.invoke(lc_messages)
             
             # 确定是返回普通消息还是工具调用
-            if need_tool_call and not last_msg_is_tool_result and "search" in [tool.get("function", {}).get("name") for tool in tools]:
+            if need_tool_call and "search" in [tool.get("function", {}).get("name") for tool in tools]:
                 # 模拟工具调用 - 这里我们创建一个search工具调用
                 response_data = {
                     "id": f"response-{agent_name}",
@@ -235,7 +182,7 @@ async def custom_copilotkit_handler(request: Request):
                                         "function": {
                                             "name": "search",
                                             "arguments": json.dumps({
-                                                "query": lc_messages[-1].content if isinstance(lc_messages[-1], HumanMessage) else "general search"
+                                                "query": lc_messages[-1].content  # 使用最后一条用户消息作为搜索查询
                                             })
                                         }
                                     }
@@ -395,3 +342,6 @@ def main():
              )
         )
     )
+
+if __name__ == "__main__":
+    main()
