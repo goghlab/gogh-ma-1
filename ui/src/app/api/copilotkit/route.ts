@@ -8,9 +8,9 @@ import {
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 
-// 始终创建OpenAI适配器，但在使用Google模型时我们会忽略它，
-// 因为我们的请求将完全由后端处理
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "dummy-key" });
+// 使用一个虚拟的OpenAI API密钥，因为我们实际上不会使用OpenAI
+// 但CopilotKit框架需要一个适配器，即使我们使用Google Gemini
+const openai = new OpenAI({ apiKey: "sk-dummy-key-for-compatibility" });
 const llmAdapter = new OpenAIAdapter({ openai } as any);
 const langsmithApiKey = process.env.LANGSMITH_API_KEY as string;
 
