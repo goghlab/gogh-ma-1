@@ -40,12 +40,6 @@ function CampaignCard({ campaign, onSelectCampaign, handleDelete, viewMode }: Ca
             >
               View
             </button>
-            <button 
-              className="px-2 py-1 text-xs rounded-md bg-[#6c2c2c] text-zinc-300 hover:bg-[#8c3c3c]"
-              onClick={() => handleDelete(campaign)}
-            >
-              Delete
-            </button>
           </div>
         </div>
       </div>
@@ -74,16 +68,10 @@ function CampaignCard({ campaign, onSelectCampaign, handleDelete, viewMode }: Ca
         </div>
         <div className="flex justify-between">
           <button 
-            className="px-3 py-1.5 text-xs rounded-md bg-[#35353a] text-zinc-300 hover:bg-[#45454a]"
+            className="w-full px-3 py-1.5 text-xs rounded-md bg-[#35353a] text-zinc-300 hover:bg-[#45454a]"
             onClick={() => onSelectCampaign && onSelectCampaign(campaign)}
           >
             View Details
-          </button>
-          <button 
-            className="px-3 py-1.5 text-xs rounded-md bg-[#6c2c2c] text-zinc-300 hover:bg-[#8c3c3c]"
-            onClick={() => handleDelete(campaign)}
-          >
-            Delete
           </button>
         </div>
       </div>
@@ -140,6 +128,34 @@ export function CampaignList({ campaigns, onSelectCampaign, userChat, viewMode: 
         console.error('Error deleting campaign:', error);
         alert('Error deleting campaign. Please try again.');
       });
+    }
+  };
+
+  const handleStatusChange = async (campaign: Campaign, newStatus: 'active' | 'draft' | 'completed' | 'scheduled') => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/campaigns/${campaign.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Campaign status updated:', data);
+
+      // 从本地状态中更新活动状态
+      const updatedCampaigns = localCampaigns.map(c =>
+        c.id === campaign.id ? { ...c, status: newStatus } : c
+      );
+      setLocalCampaigns(updatedCampaigns);
+    } catch (error) {
+      console.error('Error updating campaign status:', error);
+      alert('Error updating campaign status. Please try again.');
     }
   };
 

@@ -71,7 +71,7 @@ export default function Main() {
         
         // 将MongoDB数据转换为前端所需的Campaign类型
         const formattedCampaigns = data.map((campaign: any) => ({
-          id: campaign._id,
+          id: campaign.id || campaign._id,
           title: campaign.title,
           status: campaign.status as 'active' | 'draft' | 'completed' | 'scheduled',
           brief: campaign.description || '',
@@ -213,7 +213,7 @@ export default function Main() {
                       
                       // 将保存的活动格式化为前端所需格式
                       const formattedCampaign = {
-                        id: savedCampaign._id,
+                        id: savedCampaign.id || savedCampaign._id,
                         title: savedCampaign.title,
                         status: savedCampaign.status as 'active' | 'draft' | 'completed' | 'scheduled',
                         brief: savedCampaign.description || '',
@@ -326,7 +326,7 @@ export default function Main() {
                       console.log('Campaign saved to database:', savedCampaign);
                       
                       const formattedCampaign = {
-                        id: savedCampaign._id,
+                        id: savedCampaign.id || savedCampaign._id,
                         title: savedCampaign.title,
                         status: savedCampaign.status as 'active' | 'draft' | 'completed' | 'scheduled',
                         brief: savedCampaign.description || '',

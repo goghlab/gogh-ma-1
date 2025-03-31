@@ -49,8 +49,7 @@ export const POST = async (req: NextRequest) => {
         : copilotKitEndpoint({
             // 如果主端点/copilotkit不工作，可以切换到备份端点/copilotkit_backup
             url:
-              process.env.REMOTE_ACTION_URL || "http://localhost:8000/copilotkit",
-              
+              process.env.REMOTE_ACTION_URL || "http://localhost:8080/copilotkit",
             // 备份端点
             // url: process.env.REMOTE_ACTION_URL || "http://localhost:8000/copilotkit_backup",
           });
