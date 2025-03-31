@@ -3,7 +3,7 @@ This is the state definition for the AI.
 It defines the state of the agent and the state of the conversation.
 """
 
-from typing import List, TypedDict
+from typing import List, Dict, Any, TypedDict
 from langgraph.graph import MessagesState
 
 class Resource(TypedDict):
@@ -13,6 +13,16 @@ class Resource(TypedDict):
     url: str
     title: str
     description: str
+
+class Campaign(TypedDict):
+    """
+    Represents a marketing campaign.
+    """
+    id: str
+    title: str
+    status: str  # "active", "draft", "completed", "scheduled"
+    brief: str
+    createdAt: str
 
 class Log(TypedDict):
     """
@@ -27,7 +37,8 @@ class AgentState(MessagesState):
     It is a subclass of the MessagesState class from langgraph.
     """
     model: str
-    research_question: str
+    campaign_brief: str  # 营销活动简介
     report: str
     resources: List[Resource]
     logs: List[Log]
+    campaigns: List[Campaign]

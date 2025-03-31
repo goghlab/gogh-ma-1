@@ -1,6 +1,6 @@
 """Chat Node"""
 
-from typing import List, cast, Literal
+from typing import List, Dict, Any, cast, Literal
 from langchain_core.runnables import RunnableConfig
 from langchain_core.messages import SystemMessage, AIMessage, ToolMessage
 from langchain.tools import tool
@@ -9,20 +9,30 @@ from copilotkit.langgraph import copilotkit_customize_config
 from research_canvas.langgraph.state import AgentState
 from research_canvas.langgraph.model import get_model
 from research_canvas.langgraph.download import get_resource
+import uuid
+import datetime
 
 
 @tool
 def Search(queries: List[str]): # pylint: disable=invalid-name,unused-argument
-    """A list of one or more search queries to find good resources to support the research."""
+    """A list of one or more search queries to find good resources to support the marketing campaign."""
 
 @tool
-def WriteReport(report: str): # pylint: disable=invalid-name,unused-argument
-    """Write the research report."""
+def WriteCampaign(report: str): # pylint: disable=invalid-name,unused-argument
+    """Write the marketing campaign draft."""
 
 @tool
-def WriteResearchQuestion(research_question: str): # pylint: disable=invalid-name,unused-argument
-    """Write the research question."""
+def WriteCampaignBrief(campaign_brief: str): # pylint: disable=invalid-name,unused-argument
+    """Write the marketing campaign brief."""
 
+@tool
+def CreateCampaign(title: str, status: str = "draft"): # pylint: disable=invalid-name,unused-argument
+    """Create a new marketing campaign with given title and status."""
+
+@tool
+def DeleteCampaign(campaign_id: str, confirmation_title: str): # pylint: disable=invalid-name,unused-argument
+    """Delete a marketing campaign. Requires the campaign ID and confirmation of the campaign title for verification."""
+    
 @tool
 def DeleteResources(urls: List[str]): # pylint: disable=invalid-name,unused-argument
     """Delete the URLs from the resources."""
@@ -38,17 +48,18 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> \
         config,
         emit_intermediate_state=[{
             "state_key": "report",
-            "tool": "WriteReport",
+            "tool": "WriteCampaign",
             "tool_argument": "report",
         }, {
-            "state_key": "research_question",
-            "tool": "WriteResearchQuestion",
-            "tool_argument": "research_question",
+            "state_key": "campaign_brief",
+            "tool": "WriteCampaignBrief",
+            "tool_argument": "campaign_brief",
         }],
     )
 
     state["resources"] = state.get("resources", [])
-    research_question = state.get("research_question", "")
+    state["campaigns"] = state.get("campaigns", [])
+    campaign_brief = state.get("campaign_brief", "")
     report = state.get("report", "")
 
     resources = []
@@ -71,28 +82,54 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> \
     response = await model.bind_tools(
         [
             Search,
-            WriteReport,
-            WriteResearchQuestion,
+            WriteCampaign,
+            WriteCampaignBrief,
+            CreateCampaign,
+            DeleteCampaign,
             DeleteResources,
         ],
         **ainvoke_kwargs  # Pass the kwargs conditionally
     ).ainvoke([
         SystemMessage(
             content=f"""
-            You are a research assistant. You help the user with writing a research report.
-            Do not recite the resources, instead use them to answer the user's question.
-            You should use the search tool to get resources before answering the user's question.
-            If you finished writing the report, ask the user proactively for next steps, changes etc, make it engaging.
-            To write the report, you should use the WriteReport tool. Never EVER respond with the report, only use the tool.
-            If a research question is provided, YOU MUST NOT ASK FOR IT AGAIN.
+            You are a marketing campaign assistant. You help the user create effective marketing campaigns.
 
-            This is the research question:
-            {research_question}
+            Your primary job is to help users create and manage marketing campaigns. 
+            
+            When users start a conversation, ask them if they want to create a new marketing campaign to boost sales.
+            Offer two clear choices:
+            1. Yes, create a new campaign
+            2. No, just browsing
+            
+            If they choose to create a campaign, use the CreateCampaign tool to add a new campaign to their workspace.
+            Ask them for a campaign title and use it to create the campaign.
+            
+            If a user asks to delete a campaign:
+            1. Ask them to confirm by typing the exact campaign title
+            2. Only proceed with deletion if they correctly type the campaign title
+            3. Use the DeleteCampaign tool with the campaign ID and confirmation title
+            
+            You can also help users create a campaign brief. After creating a campaign, guide them through key questions:
+            - What product or service is being marketed?
+            - Who is the target audience?
+            - What messaging style would work best?
+            
+            Do not recite the resources, instead use them as inspiration and reference for your campaign ideas.
+            
+            When asked about creating a campaign brief, use the WriteCampaignBrief tool.
+            When asked about creating a campaign draft, use the WriteCampaign tool.
+            Never EVER respond with the draft directly, only use the appropriate tool.
 
-            This is the research report:
+            Current campaigns:
+            {state.get("campaigns", [])}
+            
+            This is the current campaign brief:
+            {campaign_brief}
+
+            This is the campaign draft:
             {report}
 
-            Here are the resources that you have available:
+            Here are the references & inspiration that you have available:
             {resources}
             """
         ),
@@ -102,7 +139,7 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> \
     ai_message = cast(AIMessage, response)
 
     if ai_message.tool_calls:
-        if ai_message.tool_calls[0]["name"] == "WriteReport":
+        if ai_message.tool_calls[0]["name"] == "WriteCampaign":
             report = ai_message.tool_calls[0]["args"].get("report", "")
             return Command(
                 goto="chat_node",
@@ -110,21 +147,84 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> \
                     "report": report,
                     "messages": [ai_message, ToolMessage(
                     tool_call_id=ai_message.tool_calls[0]["id"],
-                    content="Report written."
+                    content="Campaign draft written."
                     )]
                 }
             )
-        if ai_message.tool_calls[0]["name"] == "WriteResearchQuestion":
+        if ai_message.tool_calls[0]["name"] == "WriteCampaignBrief":
+            campaign_brief = ai_message.tool_calls[0]["args"]["campaign_brief"]
             return Command(
                 goto="chat_node",
                 update={
-                    "research_question": ai_message.tool_calls[0]["args"]["research_question"],
+                    "campaign_brief": campaign_brief,
                     "messages": [ai_message, ToolMessage(
                         tool_call_id=ai_message.tool_calls[0]["id"],
-                        content="Research question written."
+                        content="Campaign brief written."
                     )]
                 }
             )
+        if ai_message.tool_calls[0]["name"] == "CreateCampaign":
+            title = ai_message.tool_calls[0]["args"]["title"]
+            status = ai_message.tool_calls[0]["args"].get("status", "draft")
+            
+            # Create a new campaign
+            new_campaign = {
+                "id": str(uuid.uuid4()),
+                "title": title,
+                "status": status,
+                "brief": campaign_brief,
+                "createdAt": datetime.datetime.now().isoformat()
+            }
+            
+            # Add to campaigns list
+            campaigns = state.get("campaigns", [])
+            campaigns.append(new_campaign)
+            
+            return Command(
+                goto="chat_node",
+                update={
+                    "campaigns": campaigns,
+                    "messages": [ai_message, ToolMessage(
+                        tool_call_id=ai_message.tool_calls[0]["id"],
+                        content=f"New campaign '{title}' created successfully."
+                    )]
+                }
+            )
+        if ai_message.tool_calls[0]["name"] == "DeleteCampaign":
+            campaign_id = ai_message.tool_calls[0]["args"]["campaign_id"]
+            confirmation_title = ai_message.tool_calls[0]["args"]["confirmation_title"]
+            
+            # Get campaigns list
+            campaigns = state.get("campaigns", [])
+            
+            # Find campaign by ID
+            campaign_to_delete = next((c for c in campaigns if c["id"] == campaign_id), None)
+            
+            if campaign_to_delete and campaign_to_delete["title"] == confirmation_title:
+                # Remove campaign from list
+                campaigns = [c for c in campaigns if c["id"] != campaign_id]
+                
+                return Command(
+                    goto="chat_node",
+                    update={
+                        "campaigns": campaigns,
+                        "messages": [ai_message, ToolMessage(
+                            tool_call_id=ai_message.tool_calls[0]["id"],
+                            content=f"Campaign '{confirmation_title}' deleted successfully."
+                        )]
+                    }
+                )
+            else:
+                # Incorrect confirmation or campaign not found
+                return Command(
+                    goto="chat_node",
+                    update={
+                        "messages": [ai_message, ToolMessage(
+                            tool_call_id=ai_message.tool_calls[0]["id"],
+                            content=f"Cannot delete campaign. Either the campaign was not found or the confirmation title doesn't match."
+                        )]
+                    }
+                )
        
     goto = "__end__"
     if ai_message.tool_calls and ai_message.tool_calls[0]["name"] == "Search":

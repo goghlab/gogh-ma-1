@@ -1,10 +1,10 @@
-import { ResearchCanvas } from "@/components/ResearchCanvas";
-import { AgentState } from "@/lib/types";
+import { CampaignList } from "@/components/CampaignList";
+import { AgentState, Campaign } from "@/lib/types";
 import { useCoAgent } from "@copilotkit/react-core";
 import { CopilotChat } from "@copilotkit/react-ui";
 import { useCopilotChatSuggestions } from "@copilotkit/react-ui";
 import { Logo } from "@/components/Logo";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Main() {
   const model = "google_genai";
@@ -14,12 +14,16 @@ export default function Main() {
     name: agent,
     initialState: {
       model,
-      research_question: "",
+      campaign_brief: "",
       resources: [],
       report: "",
       logs: [],
+      campaigns: [],
     },
   });
+
+  // 添加选中的营销活动状态
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
 
   // 添加响应式布局状态
   const [isMobile, setIsMobile] = useState(false);
@@ -36,7 +40,7 @@ export default function Main() {
   }, []);
 
   useCopilotChatSuggestions({
-    instructions: "Lifespan of penguins",
+    instructions: "Do you want to create a new marketing campaign to boost sales?",
   });
 
   return (
@@ -50,7 +54,10 @@ export default function Main() {
         style={{ height: "calc(100vh - 60px)" }}
       >
         <div className={`${isMobile ? 'h-[50vh]' : 'flex-1'} overflow-hidden`}>
-          <ResearchCanvas />
+          <CampaignList 
+            campaigns={state.campaigns || []} 
+            onSelectCampaign={(campaign: Campaign) => setSelectedCampaign(campaign)}
+          />
         </div>
         <div
           className={`${isMobile ? 'w-full h-[50vh]' : 'w-[500px] h-full'} flex-shrink-0`}
@@ -68,14 +75,14 @@ export default function Main() {
           }
         >
           <CopilotChat
-            className="h-full"
+            className="h-full copilot-chat"
             onSubmitMessage={async (message) => {
-              // clear the logs before starting the new research
+              // clear the logs before starting the new campaign
               setState({ ...state, logs: [] });
               await new Promise((resolve) => setTimeout(resolve, 30));
             }}
             labels={{
-              initial: "Hi! How can I assist you with your research today?",
+              initial: "Hi! I'm your marketing assistant. Would you like to create a new marketing campaign to boost sales?",
             }}
           />
         </div>
