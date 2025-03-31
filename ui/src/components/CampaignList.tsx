@@ -116,12 +116,30 @@ export function CampaignList({ campaigns, onSelectCampaign, userChat, viewMode: 
   const handleDelete = (campaign: Campaign) => {
     // 创建一个确认对话框
     if (window.confirm(`Are you sure you want to delete the campaign "${campaign.title}"?`)) {
-      // 直接从本地状态中移除活动
-      const updatedCampaigns = localCampaigns.filter(c => c.id !== campaign.id);
-      setLocalCampaigns(updatedCampaigns);
-      
-      // 记录删除操作
-      console.log(`Deleted campaign: ${campaign.title} (ID: ${campaign.id})`);
+      // 从MongoDB中删除活动
+      fetch(`http://localhost:5000/api/campaigns/${campaign.id}`, {
+        method: 'DELETE',
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Campaign deleted from database:', data);
+        
+        // 从本地状态中移除活动
+        const updatedCampaigns = localCampaigns.filter(c => c.id !== campaign.id);
+        setLocalCampaigns(updatedCampaigns);
+        
+        // 记录删除操作
+        console.log(`Deleted campaign: ${campaign.title} (ID: ${campaign.id})`);
+      })
+      .catch(error => {
+        console.error('Error deleting campaign:', error);
+        alert('Error deleting campaign. Please try again.');
+      });
     }
   };
 

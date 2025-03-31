@@ -59,6 +59,41 @@ export default function Main() {
     setIsClient(true);
   }, []);
 
+  // 从MongoDB加载营销活动数据
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/campaigns');
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // 将MongoDB数据转换为前端所需的Campaign类型
+        const formattedCampaigns = data.map((campaign: any) => ({
+          id: campaign._id,
+          title: campaign.title,
+          status: campaign.status as 'active' | 'draft' | 'completed' | 'scheduled',
+          brief: campaign.description || '',
+          createdAt: campaign.createdAt
+        }));
+        
+        console.log('Fetched campaigns from database:', formattedCampaigns);
+        
+        // 更新状态
+        setState({
+          ...state,
+          campaigns: formattedCampaigns
+        });
+      } catch (error) {
+        console.error('Error fetching campaigns:', error);
+      }
+    };
+
+    // 页面加载时获取营销活动
+    fetchCampaigns();
+  }, []);
+
   // 定义新的营销活动创建操作
   useCopilotAction({
     name: "CreateNewCampaign",
@@ -146,42 +181,92 @@ export default function Main() {
                   
                   // 如果没有同名活动，创建一个新的
                   if (!existingCampaign) {
-                    // 创建新活动
-                    const newCampaign = {
-                      id: Math.random().toString(36).substring(2, 15),
+                    // 创建新活动的数据
+                    const newCampaignData = {
                       title: defaultTitle,
-                      status: 'draft' as const,
-                      brief: "",
-                      createdAt: new Date().toISOString()
+                      status: 'draft',
+                      description: "",
+                      targetAudience: {
+                        ageRange: "",
+                        gender: "",
+                        location: ""
+                      },
+                      goals: "",
+                      marketingChannels: [],
+                      budget: {
+                        amount: 0,
+                        currency: "USD"
+                      }
                     };
                     
-                    // 更新状态
-                    setState({
-                      ...state,
-                      campaigns: [...campaigns, newCampaign]
-                    });
-                    
-                    // 标记活动已创建，准备显示选项按钮
-                    setCampaignCreated(true);
-                    
-                    // 在1500ms后发送后续指导消息
-                    setTimeout(() => {
-                      // 找到输入元素
-                      const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
-                      const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
+                    // 将活动保存到MongoDB
+                    fetch('http://localhost:5000/api/campaigns', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(newCampaignData),
+                    })
+                    .then(response => response.json())
+                    .then(savedCampaign => {
+                      console.log('Campaign saved to database:', savedCampaign);
                       
-                      if (messageInput && submitButton) {
-                        // 自动发送系统消息
-                        messageInput.value = "I need help customizing this campaign";
-                        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        submitButton.click();
+                      // 将保存的活动格式化为前端所需格式
+                      const formattedCampaign = {
+                        id: savedCampaign._id,
+                        title: savedCampaign.title,
+                        status: savedCampaign.status as 'active' | 'draft' | 'completed' | 'scheduled',
+                        brief: savedCampaign.description || '',
+                        createdAt: savedCampaign.createdAt
+                      };
+                      
+                      // 更新状态
+                      setState({
+                        ...state,
+                        campaigns: [...campaigns, formattedCampaign]
+                      });
+                      
+                      // 标记活动已创建，准备显示选项按钮
+                      setCampaignCreated(true);
+                      
+                      // 在1500ms后发送后续指导消息
+                      setTimeout(() => {
+                        // 找到输入元素
+                        const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
+                        const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
                         
-                        // 800ms后显示选项按钮
-                        setTimeout(() => {
-                          setShowCampaignOptions(true);
-                        }, 800);
-                      }
-                    }, 1500);
+                        if (messageInput && submitButton) {
+                          // 自动发送系统消息
+                          messageInput.value = "I need help customizing this campaign";
+                          messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                          submitButton.click();
+                          
+                          // 800ms后显示选项按钮
+                          setTimeout(() => {
+                            setShowCampaignOptions(true);
+                          }, 800);
+                        }
+                      }, 1500);
+                    })
+                    .catch(error => {
+                      console.error('Error saving campaign:', error);
+                      
+                      // 即使API调用失败，也创建本地活动（降级方案）
+                      const newCampaign = {
+                        id: Math.random().toString(36).substring(2, 15),
+                        title: defaultTitle,
+                        status: 'draft' as const,
+                        brief: "",
+                        createdAt: new Date().toISOString()
+                      };
+                      
+                      setState({
+                        ...state,
+                        campaigns: [...campaigns, newCampaign]
+                      });
+                      
+                      setCampaignCreated(true);
+                    });
                   }
                 }, 1000);
               }, 100);
@@ -210,42 +295,85 @@ export default function Main() {
                   
                   // 如果没有同名活动，创建一个新的
                   if (!existingCampaign) {
-                    // 创建新活动
-                    const newCampaign = {
-                      id: Math.random().toString(36).substring(2, 15),
+                    // 使用相同的代码创建和保存活动到MongoDB
+                    const newCampaignData = {
                       title: defaultTitle,
-                      status: 'draft' as const,
-                      brief: "",
-                      createdAt: new Date().toISOString()
+                      status: 'draft',
+                      description: "",
+                      targetAudience: {
+                        ageRange: "",
+                        gender: "",
+                        location: ""
+                      },
+                      goals: "",
+                      marketingChannels: [],
+                      budget: {
+                        amount: 0,
+                        currency: "USD"
+                      }
                     };
                     
-                    // 更新状态
-                    setState({
-                      ...state,
-                      campaigns: [...campaigns, newCampaign]
-                    });
-                    
-                    // 标记活动已创建，准备显示选项按钮
-                    setCampaignCreated(true);
-                    
-                    // 在1500ms后发送后续指导消息
-                    setTimeout(() => {
-                      // 找到输入元素
-                      const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
-                      const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
+                    // 保存到MongoDB
+                    fetch('http://localhost:5000/api/campaigns', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(newCampaignData),
+                    })
+                    .then(response => response.json())
+                    .then(savedCampaign => {
+                      console.log('Campaign saved to database:', savedCampaign);
                       
-                      if (messageInput && submitButton) {
-                        // 自动发送系统消息
-                        messageInput.value = "I need help customizing this campaign";
-                        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        submitButton.click();
+                      const formattedCampaign = {
+                        id: savedCampaign._id,
+                        title: savedCampaign.title,
+                        status: savedCampaign.status as 'active' | 'draft' | 'completed' | 'scheduled',
+                        brief: savedCampaign.description || '',
+                        createdAt: savedCampaign.createdAt
+                      };
+                      
+                      setState({
+                        ...state,
+                        campaigns: [...campaigns, formattedCampaign]
+                      });
+                      
+                      setCampaignCreated(true);
+                      
+                      setTimeout(() => {
+                        const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
+                        const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
                         
-                        // 800ms后显示选项按钮
-                        setTimeout(() => {
-                          setShowCampaignOptions(true);
-                        }, 800);
-                      }
-                    }, 1500);
+                        if (messageInput && submitButton) {
+                          messageInput.value = "I need help customizing this campaign";
+                          messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                          submitButton.click();
+                          
+                          setTimeout(() => {
+                            setShowCampaignOptions(true);
+                          }, 800);
+                        }
+                      }, 1500);
+                    })
+                    .catch(error => {
+                      console.error('Error saving campaign:', error);
+                      
+                      // 降级方案
+                      const newCampaign = {
+                        id: Math.random().toString(36).substring(2, 15),
+                        title: defaultTitle,
+                        status: 'draft' as const,
+                        brief: "",
+                        createdAt: new Date().toISOString()
+                      };
+                      
+                      setState({
+                        ...state,
+                        campaigns: [...campaigns, newCampaign]
+                      });
+                      
+                      setCampaignCreated(true);
+                    });
                   }
                 }, 1000);
               }, 100);

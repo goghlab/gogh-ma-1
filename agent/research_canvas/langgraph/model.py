@@ -12,23 +12,27 @@ def get_model(state: AgentState) -> BaseChatModel:
     Get a model based on the environment variable.
     """
 
-    # 首先尝试从state获取
+    # First try to get from state
     state_model = state.get("model")
     
-    # 然后尝试从agent模块获取
+    # Then try to get from agent module
     agent_model = get_current_model()
     
-    # 然后尝试从环境变量获取
+    # Then try to get from environment variable
     env_model = os.getenv("MODEL")
     
-    # 按优先级选择模型
+    # Choose model based on priority
     model = state_model or agent_model or env_model or "openai"
 
     print(f"Using model: {model} (from {'state' if state_model else 'agent' if agent_model else 'env' if env_model else 'default'})")
 
     if model == "openai":
         from langchain_openai import ChatOpenAI
-        return ChatOpenAI(temperature=0, model="gpt-4o-mini")
+        return ChatOpenAI(
+            temperature=0, 
+            model="gpt-4o-mini", 
+            model_kwargs={"response_format": {"type": "json_object"}}
+        )
     if model == "anthropic":
         from langchain_anthropic import ChatAnthropic
         return ChatAnthropic(
@@ -42,7 +46,8 @@ def get_model(state: AgentState) -> BaseChatModel:
         return ChatGoogleGenerativeAI(
             temperature=0,
             model="gemini-1.5-pro",
-            api_key=cast(Any, os.getenv("GOOGLE_API_KEY")) or None
+            api_key=cast(Any, os.getenv("GOOGLE_API_KEY")) or None,
+            convert_system_message_to_human=True
         )
 
     raise ValueError("Invalid model specified")
