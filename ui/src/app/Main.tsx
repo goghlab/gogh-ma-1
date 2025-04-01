@@ -24,16 +24,16 @@ export default function Main() {
     },
   });
 
-  // 添加选中的营销活动状态
+  // Add selected campaign state
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   
-  // 添加当前视图状态
+  // Add current view state
   const [activeView, setActiveView] = useState<string>("campaigns");
 
-  // 添加响应式布局状态
+  // Add responsive layout state
   const [isMobile, setIsMobile] = useState(false);
 
-  // 添加聊天状态跟踪
+  // Add chat state tracking
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showCampaignOptions, setShowCampaignOptions] = useState(false);
@@ -41,49 +41,49 @@ export default function Main() {
   const [campaignCreated, setCampaignCreated] = useState(false);
   const [hasAskedAboutCampaign, setHasAskedAboutCampaign] = useState(false);
 
-  // 添加客户端渲染状态
+  // Add client-side rendering state
   const [isClient, setIsClient] = useState(false);
 
-  // 添加本地示例数据
+  // Add local sample data
   const dummyCampaigns = [
     {
       id: "campaign-1",
-      title: "夏季新品促销活动",
+      title: "Summer Product Promotion",
       status: "active" as const,
-      brief: "推广我们新的夏季产品线，目标是提高销售额和品牌曝光度。",
+      brief: "Promote our new summer product line with the goal of increasing sales and brand exposure.",
       createdAt: new Date(2023, 4, 15).toISOString()
     },
     {
       id: "campaign-2",
-      title: "会员忠诚度计划",
+      title: "Customer Loyalty Program",
       status: "draft" as const,
-      brief: "为现有客户建立忠诚度计划，鼓励重复购买并提高客户保留率。",
+      brief: "Create a loyalty program for existing customers to encourage repeat purchases and improve retention.",
       createdAt: new Date(2023, 5, 10).toISOString()
     },
     {
       id: "campaign-3",
-      title: "内容营销策略",
+      title: "Content Marketing Strategy",
       status: "completed" as const,
-      brief: "创建高质量的内容以吸引新受众并建立我们在行业内的专业形象。",
+      brief: "Create high-quality content to attract new audiences and establish our professional image in the industry.",
       createdAt: new Date(2023, 3, 22).toISOString()
     },
     {
       id: "campaign-4",
-      title: "节日促销活动",
+      title: "Holiday Promotions",
       status: "active" as const,
-      brief: "为即将到来的节日季节准备特别促销活动，提高销售额。",
+      brief: "Prepare special promotions for the upcoming holiday season to boost sales.",
       createdAt: new Date(2023, 6, 5).toISOString()
     },
     {
       id: "campaign-5",
-      title: "产品发布会",
+      title: "Product Launch Event",
       status: "draft" as const,
-      brief: "为新产品线规划一场大型发布活动。",
+      brief: "Plan a major launch event for the new product line.",
       createdAt: new Date(2023, 7, 20).toISOString()
     }
   ];
 
-  // 检测窗口大小并更新isMobile状态
+  // Detect window size and update isMobile state
   useEffect(() => {
     const checkWindowSize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -99,16 +99,16 @@ export default function Main() {
     setIsClient(true);
   }, []);
 
-  // 从MongoDB加载营销活动数据
+  // Load marketing campaign data from MongoDB
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        // 使用本地数据
+        // Use local data
         const formattedCampaigns = [...dummyCampaigns];
         
-        console.log('使用本地示例活动数据:', formattedCampaigns);
+        console.log('Using local sample campaign data:', formattedCampaigns);
         
-        // 更新状态
+        // Update state
         setState({
           ...state,
           campaigns: formattedCampaigns
@@ -118,32 +118,32 @@ export default function Main() {
       }
     };
 
-    // 页面加载时获取营销活动
+    // Get campaigns when page loads
     fetchCampaigns();
   }, []);
 
-  // 定义新的营销活动创建操作
+  // Define new marketing campaign creation action
   useCopilotAction({
     name: "CreateNewCampaign",
-    description: "创建一个新的营销活动",
+    description: "Create a new marketing campaign",
     parameters: [],
     handler: () => {
-      // 清除日志
+      // Clear logs
       setState({ ...state, logs: [] });
-      // 切换到campaigns视图
+      // Switch to campaigns view
       setActiveView("campaigns");
     }
   });
 
-  // 定义浏览操作
+  // Define browsing action
   useCopilotAction({
     name: "JustBrowsing",
-    description: "用户只想浏览，不创建新活动",
+    description: "User just wants to browse, not create a new campaign",
     parameters: [],
     handler: () => {
-      // 清除日志
+      // Clear logs
       setState({ ...state, logs: [] });
-      // 无特殊操作，AI会处理回复
+      // No special operation, AI will handle the reply
     }
   });
 
@@ -168,48 +168,48 @@ export default function Main() {
     `
   }, [hasAskedAboutCampaign]);
 
-  // 为聊天提供建议回复
+  // Provide suggested replies for chat
   const getSuggestedReplies = () => {
     return [
       { 
         text: "Yes, create a new campaign",
         onClick: () => {
-          // 标记用户已交互
+          // Mark user as having interacted
           setHasInteracted(true);
           setShowSuggestions(false);
-          // 标记已询问过创建活动的问题
+          // Mark that we've asked about creating a campaign
           setHasAskedAboutCampaign(true);
           
-          // 触发视图切换
+          // Trigger view switch
           setActiveView("campaigns");
           
-          // 模拟用户输入并发送消息
+          // Simulate user input and send message
           const message = "Yes, create a new campaign";
-          // 找到输入元素
+          // Find input element
           const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
           if (messageInput) {
-            // 设置值
+            // Set value
             messageInput.value = message;
-            // 触发输入事件
+            // Trigger input event
             messageInput.dispatchEvent(new Event('input', { bubbles: true }));
             
-            // 直接使用提交按钮
+            // Directly use the submit button
             const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
             if (submitButton) {
               setTimeout(() => {
                 submitButton.click();
                 
-                // 等待AI响应后，再次检查是否需要创建新活动
+                // Wait for AI response before checking if a new campaign is needed
                 setTimeout(() => {
                   const defaultTitle = "New Marketing Campaign";
                   
-                  // 先尝试获取当前的活动列表
+                  // First, try to get the current campaign list
                   const campaigns = state.campaigns || [];
                   const existingCampaign = campaigns.find(c => c.title === defaultTitle);
                   
-                  // 如果没有同名活动，创建一个新的
+                  // If no campaign with the same name exists, create a new one
                   if (!existingCampaign) {
-                    // 创建新活动的数据
+                    // Create new campaign data
                     const newCampaignData = {
                       title: defaultTitle,
                       status: 'draft',
@@ -227,7 +227,7 @@ export default function Main() {
                       }
                     };
                     
-                    // 将活动保存到MongoDB
+                    // Save to MongoDB
                     fetch('http://localhost:5000/api/campaigns', {
                       method: 'POST',
                       headers: {
@@ -239,7 +239,7 @@ export default function Main() {
                     .then(savedCampaign => {
                       console.log('Campaign saved to database:', savedCampaign);
                       
-                      // 将保存的活动格式化为前端所需格式
+                      // Format saved campaign for frontend
                       const formattedCampaign = {
                         id: savedCampaign.id || savedCampaign._id,
                         title: savedCampaign.title,
@@ -248,28 +248,28 @@ export default function Main() {
                         createdAt: savedCampaign.createdAt
                       };
                       
-                      // 更新状态
+                      // Update state
                       setState({
                         ...state,
                         campaigns: [...campaigns, formattedCampaign]
                       });
                       
-                      // 标记活动已创建，准备显示选项按钮
+                      // Mark campaign as created, prepare to show option buttons
                       setCampaignCreated(true);
                       
-                      // 在1500ms后发送后续指导消息
+                      // Send follow-up guidance message in 1500ms
                       setTimeout(() => {
-                        // 找到输入元素
+                        // Find input element
                         const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
                         const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
                         
                         if (messageInput && submitButton) {
-                          // 自动发送系统消息
+                          // Automatically send system message
                           messageInput.value = "I need help customizing this campaign";
                           messageInput.dispatchEvent(new Event('input', { bubbles: true }));
                           submitButton.click();
                           
-                          // 800ms后显示选项按钮
+                          // 800ms later, show option buttons
                           setTimeout(() => {
                             setShowCampaignOptions(true);
                           }, 800);
@@ -279,7 +279,7 @@ export default function Main() {
                     .catch(error => {
                       console.error('Error saving campaign:', error);
                       
-                      // 即使API调用失败，也创建本地活动（降级方案）
+                      // Even if API call fails, create local campaign (fallback solution)
                       const newCampaign = {
                         id: Math.random().toString(36).substring(2, 15),
                         title: defaultTitle,
@@ -299,7 +299,7 @@ export default function Main() {
                 }, 1000);
               }, 100);
             } else {
-              // 回退方案：触发回车键
+              // Fallback solution: trigger enter key
               setTimeout(() => {
                 messageInput.dispatchEvent(new KeyboardEvent('keydown', {
                   key: 'Enter',
@@ -310,20 +310,20 @@ export default function Main() {
                   cancelable: true
                 }));
                 
-                // 立即切换到campaigns视图
+                // Immediately switch to campaigns view
                 setActiveView("campaigns");
                 
-                // 等待AI响应后，再次检查是否需要创建新活动
+                // Wait for AI response before checking if a new campaign is needed
                 setTimeout(() => {
                   const defaultTitle = "New Marketing Campaign";
                   
-                  // 先尝试获取当前的活动列表
+                  // First, try to get the current campaign list
                   const campaigns = state.campaigns || [];
                   const existingCampaign = campaigns.find(c => c.title === defaultTitle);
                   
-                  // 如果没有同名活动，创建一个新的
+                  // If no campaign with the same name exists, create a new one
                   if (!existingCampaign) {
-                    // 使用相同的代码创建和保存活动到MongoDB
+                    // Use the same code to create and save campaign to MongoDB
                     const newCampaignData = {
                       title: defaultTitle,
                       status: 'draft',
@@ -341,7 +341,7 @@ export default function Main() {
                       }
                     };
                     
-                    // 保存到MongoDB
+                    // Save to MongoDB
                     fetch('http://localhost:5000/api/campaigns', {
                       method: 'POST',
                       headers: {
@@ -386,7 +386,7 @@ export default function Main() {
                     .catch(error => {
                       console.error('Error saving campaign:', error);
                       
-                      // 降级方案
+                      // Fallback solution
                       const newCampaign = {
                         id: Math.random().toString(36).substring(2, 15),
                         title: defaultTitle,
@@ -412,30 +412,30 @@ export default function Main() {
       { 
         text: "No, just browsing",
         onClick: () => {
-          // 标记用户已交互
+          // Mark user as having interacted
           setHasInteracted(true);
           setShowSuggestions(false);
-          // 标记已询问过创建活动的问题
+          // Mark that we've asked about creating a campaign
           setHasAskedAboutCampaign(true);
           
-          // 模拟用户输入并发送消息
+          // Simulate user input and send message
           const message = "No, just browsing";
-          // 找到输入元素
+          // Find input element
           const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
           if (messageInput) {
-            // 设置值
+            // Set value
             messageInput.value = message;
-            // 触发输入事件
+            // Trigger input event
             messageInput.dispatchEvent(new Event('input', { bubbles: true }));
             
-            // 直接使用提交按钮
+            // Directly use the submit button
             const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
             if (submitButton) {
               setTimeout(() => {
                 submitButton.click();
               }, 100);
             } else {
-              // 回退方案：触发回车键
+              // Fallback solution: trigger enter key
               setTimeout(() => {
                 messageInput.dispatchEvent(new KeyboardEvent('keydown', {
                   key: 'Enter',
@@ -453,14 +453,14 @@ export default function Main() {
     ];
   };
 
-  // 创建活动设置选项
+  // Create campaign setup options
   const getCampaignOptionReplies = () => {
     return [
       { 
         text: "1. Target Audience: Who are you trying to reach? Tell me about your ideal customer.",
         onClick: () => {
           sendChatMessage("I want to define the target audience");
-          // 显示年龄段选项
+          // Show age range options
           setTimeout(() => {
             setShowAgeRangeOptions(true);
           }, 1000);
@@ -487,7 +487,7 @@ export default function Main() {
     ];
   };
 
-  // 创建年龄段选项
+  // Create age range options
   const getAgeRangeOptions = () => {
     return [
       { 
@@ -528,22 +528,22 @@ export default function Main() {
     ];
   };
 
-  // 辅助函数：发送聊天消息
+  // Helper function: send chat message
   const sendChatMessage = (message: string) => {
-    // 隐藏选项按钮
+    // Hide option buttons
     setShowCampaignOptions(false);
     setShowAgeRangeOptions(false);
     
-    // 找到输入元素
+    // Find input element
     const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
     const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
     
     if (messageInput && submitButton) {
-      // 设置值
+      // Set value
       messageInput.value = message;
-      // 触发输入事件
+      // Trigger input event
       messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-      // 点击提交按钮
+      // Click submit button
       setTimeout(() => {
         submitButton.click();
       }, 100);
@@ -796,7 +796,7 @@ export default function Main() {
               border-top: 1px solid #2a2a2e;
             }
             
-            /* 滚动条样式 */
+            /* Scrollbar styles */
             .copilotKitChatFeed::-webkit-scrollbar {
               width: 6px !important;
               height: 6px !important;
@@ -815,14 +815,14 @@ export default function Main() {
               background-color: rgba(93, 78, 255, 0.5) !important;
             }
             
-            /* 加载状态动画 */
+            /* Loading status animation */
             .copilotKitTypingIndicator {
               color: #9e97ff !important;
               font-size: 13px !important;
               padding: 4px 8px !important;
             }
             
-            /* 选项按钮自定义样式 */
+            /* Option button custom styles */
             .campaign-option-button {
               width: 100%;
               padding: 12px 16px !important;
@@ -873,19 +873,19 @@ export default function Main() {
           <CopilotChat
             className="h-full copilot-chat"
             onSubmitMessage={async (message) => {
-              // 标记用户已交互
+              // Mark user as having interacted
               setHasInteracted(true);
               setShowSuggestions(false);
-              // 标记已询问过创建活动的问题
+              // Mark that we've asked about creating a campaign
               setHasAskedAboutCampaign(true);
               
-              // 如果用户已经开始设置活动，hide campaign options
+              // If user has already started setting up a campaign, hide campaign options
               if (campaignCreated && message.toLowerCase() !== "i need help customizing this campaign") {
                 setShowCampaignOptions(false);
                 setShowAgeRangeOptions(false);
               }
               
-              // clear the logs before starting the new campaign
+              // Clear the logs before starting a new campaign
               setState({ ...state, logs: [] });
               await new Promise((resolve) => setTimeout(resolve, 30));
             }}
@@ -896,7 +896,7 @@ export default function Main() {
             }}
           />
           
-          {/* 添加初始建议回复按钮 */}
+          {/* Add initial suggested reply buttons */}
           {showSuggestions && !hasInteracted && (
             <div className="custom-suggestions">
               {getSuggestedReplies().map((reply, index) => (
@@ -911,14 +911,14 @@ export default function Main() {
             </div>
           )}
           
-          {/* 添加活动设置选项按钮 */}
+          {/* Add campaign setup option buttons */}
           {showCampaignOptions && !showAgeRangeOptions && (
             <div className="custom-suggestions">
               <div className="w-full text-center text-sm text-gray-400 mb-3">Choose an option to continue:</div>
               {getCampaignOptionReplies().map((reply, index) => {
-                // 将文本分割为标题和示例部分
+                // Split text into title and example parts
                 const textParts = reply.text.split('(e.g.,');
-                const mainText = textParts[0].replace(/^\d+\.\s+/, ''); // 移除数字前缀
+                const mainText = textParts[0].replace(/^\d+\.\s+/, ''); // Remove number prefix
                 const exampleText = textParts.length > 1 ? `(e.g., ${textParts[1]}` : '';
                 const numberPrefix = reply.text.match(/^\d+/)?.[0] || (index + 1).toString();
                 
@@ -939,7 +939,7 @@ export default function Main() {
             </div>
           )}
           
-          {/* 添加年龄段选项按钮 */}
+          {/* Add age range option buttons */}
           {showAgeRangeOptions && (
             <div className="custom-suggestions">
               <div className="w-full text-center text-sm text-gray-400 mb-3">Select target audience age range:</div>
