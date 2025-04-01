@@ -1,4 +1,5 @@
 import { CampaignList } from "@/components/CampaignList";
+import { CampaignDetail } from "@/components/CampaignDetail";
 import { AgentState, Campaign } from "@/lib/types";
 import { useCoAgent, useCopilotAction } from "@copilotkit/react-core";
 import { CopilotChat } from "@copilotkit/react-ui";
@@ -43,6 +44,45 @@ export default function Main() {
   // 添加客户端渲染状态
   const [isClient, setIsClient] = useState(false);
 
+  // 添加本地示例数据
+  const dummyCampaigns = [
+    {
+      id: "campaign-1",
+      title: "夏季新品促销活动",
+      status: "active" as const,
+      brief: "推广我们新的夏季产品线，目标是提高销售额和品牌曝光度。",
+      createdAt: new Date(2023, 4, 15).toISOString()
+    },
+    {
+      id: "campaign-2",
+      title: "会员忠诚度计划",
+      status: "draft" as const,
+      brief: "为现有客户建立忠诚度计划，鼓励重复购买并提高客户保留率。",
+      createdAt: new Date(2023, 5, 10).toISOString()
+    },
+    {
+      id: "campaign-3",
+      title: "内容营销策略",
+      status: "completed" as const,
+      brief: "创建高质量的内容以吸引新受众并建立我们在行业内的专业形象。",
+      createdAt: new Date(2023, 3, 22).toISOString()
+    },
+    {
+      id: "campaign-4",
+      title: "节日促销活动",
+      status: "active" as const,
+      brief: "为即将到来的节日季节准备特别促销活动，提高销售额。",
+      createdAt: new Date(2023, 6, 5).toISOString()
+    },
+    {
+      id: "campaign-5",
+      title: "产品发布会",
+      status: "draft" as const,
+      brief: "为新产品线规划一场大型发布活动。",
+      createdAt: new Date(2023, 7, 20).toISOString()
+    }
+  ];
+
   // 检测窗口大小并更新isMobile状态
   useEffect(() => {
     const checkWindowSize = () => {
@@ -63,22 +103,10 @@ export default function Main() {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/campaigns');
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        const data = await response.json();
+        // 使用本地数据
+        const formattedCampaigns = [...dummyCampaigns];
         
-        // 将MongoDB数据转换为前端所需的Campaign类型
-        const formattedCampaigns = data.map((campaign: any) => ({
-          id: campaign.id || campaign._id,
-          title: campaign.title,
-          status: campaign.status as 'active' | 'draft' | 'completed' | 'scheduled',
-          brief: campaign.description || '',
-          createdAt: campaign.createdAt
-        }));
-        
-        console.log('Fetched campaigns from database:', formattedCampaigns);
+        console.log('使用本地示例活动数据:', formattedCampaigns);
         
         // 更新状态
         setState({
@@ -528,10 +556,17 @@ export default function Main() {
       default:
         return (
           <div className="w-full h-full">
-            <CampaignList 
-              campaigns={state.campaigns || []} 
-              onSelectCampaign={(campaign: Campaign) => setSelectedCampaign(campaign)}
-            />
+            {selectedCampaign ? (
+              <CampaignDetail 
+                campaign={selectedCampaign} 
+                onBack={() => setSelectedCampaign(null)}
+              />
+            ) : (
+              <CampaignList 
+                campaigns={state.campaigns || []} 
+                onSelectCampaign={(campaign: Campaign) => setSelectedCampaign(campaign)}
+              />
+            )}
           </div>
         );
     }

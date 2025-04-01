@@ -115,16 +115,29 @@ app.use(express.json());
 
 // API路由 - 获取所有营销活动
 app.get('/api/campaigns', (req, res) => {
-  res.json(sampleCampaigns);
+  try {
+    res.json(sampleCampaigns);
+  } catch (error) {
+    console.error('Error fetching campaigns:', error);
+    res.status(500).json({ error: 'Error fetching campaigns' });
+  }
 });
 
 // API路由 - 获取单个营销活动
 app.get('/api/campaigns/:id', (req, res) => {
-  const campaign = sampleCampaigns.find(c => c.id === req.params.id);
-  if (!campaign) {
-    return res.status(404).json({ message: 'Campaign not found' });
+  try {
+    const campaignId = req.params.id;
+    const campaign = sampleCampaigns.find(c => c.id === campaignId);
+    
+    if (!campaign) {
+      return res.status(404).json({ error: 'Campaign not found' });
+    }
+    
+    res.json(campaign);
+  } catch (error) {
+    console.error('Error fetching campaign:', error);
+    res.status(500).json({ error: 'Error fetching campaign' });
   }
-  res.json(campaign);
 });
 
 // API路由 - 创建新的营销活动
