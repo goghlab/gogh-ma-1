@@ -1,0 +1,146 @@
+[
+  {
+    "id": "02f0dc6c-cc8c-4ccb-b4b8-4b7f4225de62",
+    "title": "夏季新品促销活动",
+    "status": "active",
+    "brief": "推广我们新的夏季产品线，目标是提高销售额和品牌曝光度。",
+    "createdAt": "2023-05-14T16:00:00.000Z",
+    "targetAudience": {
+      "ageRange": "18-35",
+      "gender": "所有",
+      "location": "全国一线城市"
+    },
+    "goals": "提高品牌知名度，增加30%的网站流量，销售增长25%",
+    "marketingChannels": [
+      "社交媒体",
+      "影响者营销",
+      "电子邮件"
+    ],
+    "budget": {
+      "amount": 50000,
+      "currency": "CNY"
+    },
+    "description": "夏季系列产品推广，包括新款服装、配饰和家居用品。"
+  },
+  {
+    "id": "d64d1a95-8d53-4f26-bb5b-b442a3dd773a",
+    "title": "会员忠诚度计划",
+    "status": "draft",
+    "brief": "为现有客户建立忠诚度计划，鼓励重复购买并提高客户保留率。",
+    "createdAt": "2023-06-09T16:00:00.000Z",
+    "targetAudience": {
+      "ageRange": "25-55",
+      "gender": "所有",
+      "location": "全国"
+    },
+    "goals": "提高客户终身价值，增加会员计划注册，提高重复购买率",
+    "marketingChannels": [
+      "电子邮件",
+      "移动应用",
+      "直接营销"
+    ],
+    "budget": {
+      "amount": 30000,
+      "currency": "CNY"
+    },
+    "description": "为忠实客户提供特别折扣、优先购买权和专属活动。"
+  },
+  {
+    "id": "0efc0194-6a22-4abc-a96c-8f70aaa69790",
+    "title": "内容营销策略",
+    "status": "completed",
+    "brief": "创建高质量的内容以吸引新受众并建立我们在行业内的专业形象。",
+    "createdAt": "2023-04-21T16:00:00.000Z",
+    "targetAudience": {
+      "ageRange": "20-45",
+      "gender": "所有",
+      "location": "全国"
+    },
+    "goals": "增加网站流量，提高社交媒体参与度，增加转化率",
+    "marketingChannels": [
+      "博客",
+      "社交媒体",
+      "电子书"
+    ],
+    "budget": {
+      "amount": 20000,
+      "currency": "CNY"
+    },
+    "description": "创建和分发与目标受众相关的价值内容。"
+  },
+  {
+    "id": "9f4f26cd-9851-4319-b703-8eec9d9f6b9a",
+    "title": "节日促销活动",
+    "status": "scheduled",
+    "brief": "为即将到来的节日季节准备特别促销活动，提高销售额。",
+    "createdAt": "2023-07-04T16:00:00.000Z",
+    "targetAudience": {
+      "ageRange": "所有",
+      "gender": "所有",
+      "location": "全国"
+    },
+    "goals": "提高节日季节销售额，吸引新客户，清理库存",
+    "marketingChannels": [
+      "电视广告",
+      "社交媒体",
+      "电子邮件",
+      "线下活动"
+    ],
+    "budget": {
+      "amount": 100000,
+      "currency": "CNY"
+    },
+    "description": "节日限时优惠，包括特别礼品包装和送货选项。"
+  },
+  {
+    "id": "284106df-5072-4726-aa74-4713cfc206aa",
+    "title": "产品发布会",
+    "status": "draft",
+    "brief": "为新产品线规划一场大型发布活动。",
+    "createdAt": "2023-08-19T16:00:00.000Z",
+    "targetAudience": {
+      "ageRange": "25-40",
+      "gender": "所有",
+      "location": "北京、上海、广州"
+    },
+    "goals": "创造产品知名度，获得媒体报道，生成销售线索",
+    "marketingChannels": [
+      "专业活动",
+      "新闻发布",
+      "社交媒体"
+    ],
+    "budget": {
+      "amount": 80000,
+      "currency": "CNY"
+    },
+    "description": "包括新闻发布会、媒体专访和产品演示。"
+  },
+  {
+    "id": "fe1e0862-efd3-4de0-aa69-895a73326938",
+    "title": "测试持久化活动",
+    "status": "draft",
+    "brief": "测试数据持久化功能",
+    "createdAt": "2025-04-01T20:11:34.750Z"
+  },
+  {
+    "id": "350d7253-1732-46ee-ba52-aebac420ed83",
+    "title": "刷新后不会消失的活动",
+    "status": "active",
+    "brief": "通过API测试数据持久化功能",
+    "createdAt": "2025-04-01T20:12:22.683Z"
+  },
+  {
+    "id": "0adf3a34-c2d3-45b9-b4d9-e3e4c497dde0",
+    "title": "测试API创",
+    "status": "draft",
+    "brief": "API测试",
+    "createdAt": "2025-04-01T20:19:36.903Z"
+  },
+  {
+    "id": "18cc8afc-dfd5-468e-8a65-56e37a9118b2",
+    "title": "8000",
+    "status": "draft",
+    "brief": "",
+    "createdAt": "2025-04-02T13:29:22.590531"
+  }
+]

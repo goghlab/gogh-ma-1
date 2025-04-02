@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
 
 // 加载环境变量，使用绝对路径
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -10,8 +11,11 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const app = express();
 const PORT = 5000; // 固定使用5000端口
 
-// 示例营销活动数据
-const sampleCampaigns = [
+// 数据文件路径
+const CAMPAIGNS_FILE = path.resolve(__dirname, 'campaigns.json');
+
+// 初始示例活动数据
+const initialCampaigns = [
   {
     id: uuidv4(),
     title: "夏季新品促销活动",
@@ -109,6 +113,37 @@ const sampleCampaigns = [
   }
 ];
 
+// 读取持久化的活动数据
+function readCampaigns() {
+  try {
+    if (fs.existsSync(CAMPAIGNS_FILE)) {
+      const data = fs.readFileSync(CAMPAIGNS_FILE, 'utf8');
+      return JSON.parse(data);
+    } else {
+      // 如果文件不存在，则使用初始数据并写入文件
+      fs.writeFileSync(CAMPAIGNS_FILE, JSON.stringify(initialCampaigns, null, 2), 'utf8');
+      return initialCampaigns;
+    }
+  } catch (error) {
+    console.error('读取活动数据失败:', error);
+    return initialCampaigns;
+  }
+}
+
+// 写入活动数据到文件
+function writeCampaigns(campaigns) {
+  try {
+    fs.writeFileSync(CAMPAIGNS_FILE, JSON.stringify(campaigns, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('保存活动数据失败:', error);
+    return false;
+  }
+}
+
+// 初始化活动数据
+let campaigns = readCampaigns();
+
 // 中间件
 app.use(cors());
 app.use(express.json());
@@ -116,10 +151,12 @@ app.use(express.json());
 // API路由 - 获取所有营销活动
 app.get('/api/campaigns', (req, res) => {
   try {
-    res.json(sampleCampaigns);
+    // 每次获取时都重新读取，确保数据最新
+    campaigns = readCampaigns();
+    res.json(campaigns);
   } catch (error) {
-    console.error('Error fetching campaigns:', error);
-    res.status(500).json({ error: 'Error fetching campaigns' });
+    console.error('获取活动失败:', error);
+    res.status(500).json({ error: '获取活动失败' });
   }
 });
 
@@ -127,64 +164,108 @@ app.get('/api/campaigns', (req, res) => {
 app.get('/api/campaigns/:id', (req, res) => {
   try {
     const campaignId = req.params.id;
-    const campaign = sampleCampaigns.find(c => c.id === campaignId);
+    const campaign = campaigns.find(c => c.id === campaignId);
     
     if (!campaign) {
-      return res.status(404).json({ error: 'Campaign not found' });
+      return res.status(404).json({ error: '找不到该活动' });
     }
     
     res.json(campaign);
   } catch (error) {
-    console.error('Error fetching campaign:', error);
-    res.status(500).json({ error: 'Error fetching campaign' });
+    console.error('获取活动失败:', error);
+    res.status(500).json({ error: '获取活动失败' });
   }
 });
 
 // API路由 - 创建新的营销活动
 app.post('/api/campaigns', (req, res) => {
-  const newCampaign = {
-    id: uuidv4(),
-    ...req.body,
-    createdAt: new Date().toISOString()
-  };
-  sampleCampaigns.push(newCampaign);
-  res.status(201).json(newCampaign);
+  try {
+    console.log('收到创建活动请求:', JSON.stringify(req.body, null, 2));
+    
+    // 保留客户端传来的ID，如果没有则生成新ID
+    const newCampaign = {
+      id: req.body.id || uuidv4(),
+      ...req.body,
+      createdAt: req.body.createdAt || new Date().toISOString()
+    };
+    
+    console.log('准备创建新活动:', JSON.stringify(newCampaign, null, 2));
+    campaigns.push(newCampaign);
+    
+    // 写入文件保存
+    const success = writeCampaigns(campaigns);
+    if (!success) {
+      console.error('保存活动到文件失败');
+      return res.status(500).json({ error: '保存活动失败' });
+    }
+    
+    console.log('成功创建活动，当前活动总数:', campaigns.length);
+    res.status(201).json(newCampaign);
+  } catch (error) {
+    console.error('创建活动失败:', error);
+    res.status(500).json({ error: '创建活动失败' });
+  }
 });
 
 // API路由 - 更新营销活动
 app.patch('/api/campaigns/:id', (req, res) => {
-  const campaignIndex = sampleCampaigns.findIndex(c => c.id === req.params.id);
-  if (campaignIndex === -1) {
-    return res.status(404).json({ message: 'Campaign not found' });
+  try {
+    const campaignIndex = campaigns.findIndex(c => c.id === req.params.id);
+    if (campaignIndex === -1) {
+      return res.status(404).json({ message: '找不到该活动' });
+    }
+    
+    campaigns[campaignIndex] = {
+      ...campaigns[campaignIndex],
+      ...req.body
+    };
+    
+    // 写入文件保存
+    const success = writeCampaigns(campaigns);
+    if (!success) {
+      return res.status(500).json({ error: '保存活动失败' });
+    }
+    
+    res.json(campaigns[campaignIndex]);
+  } catch (error) {
+    console.error('更新活动失败:', error);
+    res.status(500).json({ error: '更新活动失败' });
   }
-  
-  sampleCampaigns[campaignIndex] = {
-    ...sampleCampaigns[campaignIndex],
-    ...req.body
-  };
-  
-  res.json(sampleCampaigns[campaignIndex]);
 });
 
 // API路由 - 删除营销活动
 app.delete('/api/campaigns/:id', (req, res) => {
-  const campaignIndex = sampleCampaigns.findIndex(c => c.id === req.params.id);
-  if (campaignIndex === -1) {
-    return res.status(404).json({ message: 'Campaign not found' });
+  try {
+    const campaignIndex = campaigns.findIndex(c => c.id === req.params.id);
+    if (campaignIndex === -1) {
+      return res.status(404).json({ message: '找不到该活动' });
+    }
+    
+    const deletedCampaign = campaigns.splice(campaignIndex, 1)[0];
+    
+    // 写入文件保存
+    const success = writeCampaigns(campaigns);
+    if (!success) {
+      return res.status(500).json({ error: '保存活动失败' });
+    }
+    
+    console.log(`成功删除活动ID: ${req.params.id}`);
+    res.json({ message: '活动已删除', campaign: deletedCampaign });
+  } catch (error) {
+    console.error('删除活动失败:', error);
+    res.status(500).json({ error: '删除活动失败' });
   }
-  
-  const deletedCampaign = sampleCampaigns.splice(campaignIndex, 1)[0];
-  res.json({ message: 'Campaign deleted', campaign: deletedCampaign });
 });
 
 // 根路由
 app.get('/', (req, res) => {
-  res.send('Marketing Campaigns API');
+  res.send('营销活动API - 数据已持久化存储');
 });
 
 // 启动服务器
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`服务器在端口 ${PORT} 上运行中`);
+  console.log(`活动数据将持久保存到: ${CAMPAIGNS_FILE}`);
 });
 
 module.exports = app; 

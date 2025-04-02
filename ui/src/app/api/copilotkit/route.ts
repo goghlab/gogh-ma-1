@@ -8,69 +8,85 @@ import {
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 
-// 使用一个虚拟的OpenAI API密钥，因为我们实际上不会使用OpenAI
-// 但CopilotKit框架需要一个适配器，即使我们使用Google Gemini
-const openai = new OpenAI({ apiKey: "sk-dummy-key-for-compatibility" });
-const llmAdapter = new OpenAIAdapter({ openai } as any);
-const langsmithApiKey = process.env.LANGSMITH_API_KEY as string;
+// 创建一个最小化的适配器
+const dummyAdapter = new OpenAIAdapter({ 
+  openai: new OpenAI({ apiKey: "dummy" }) as any, 
+  model: "gpt-3.5-turbo" 
+});
 
+// 定义Campaign接口用于类型检查
+interface Campaign {
+  id: string;
+  title: string;
+  status: string;
+  brief: string;
+  createdAt: string;
+}
+
+// 配置直接调用本地的LangGraph代理
 export const POST = async (req: NextRequest) => {
   try {
+    console.log("收到CopilotKit请求");
+    
+    // 检查是否是创建活动的操作
+    let body;
+    try {
+      const clonedRequest = req.clone();
+      body = await clonedRequest.json();
+      
+      if (body?.messages) {
+        const lastMessage = body.messages[body.messages.length - 1];
+        if (lastMessage?.role === 'user') {
+          console.log("用户消息内容:", lastMessage.content);
+        }
+      }
+      
+      // 检查是否是工具调用
+      if (body?.actions) {
+        console.log("请求包含工具调用:", JSON.stringify(body.actions, null, 2));
+      }
+    } catch (error) {
+      console.log("无法解析请求体:", error);
+    }
+
+    // 设置LangGraph代理端点
     const searchParams = req.nextUrl.searchParams;
-    const deploymentUrl =
-      searchParams.get("lgcDeploymentUrl") || process.env.LGC_DEPLOYMENT_URL;
-
-    const isCrewAi = searchParams.get("coAgentsModel") === "crewai";
     const isGoogleGenAI = searchParams.get("coAgentsModel") === "google_genai";
-
-    // 确保在使用Google Generative AI时使用正确的agent名称
     const agentName = isGoogleGenAI ? "research_agent_google_genai" : "research_agent";
 
     console.log("Creating endpoint with agentName:", agentName);
     console.log("isGoogleGenAI:", isGoogleGenAI);
 
-    const remoteEndpoint =
-      deploymentUrl && !isCrewAi
-        ? langGraphPlatformEndpoint({
-            deploymentUrl,
-            langsmithApiKey,
-            agents: [
-              {
-                name: "research_agent",
-                description: "Research agent",
-              },
-              {
-                name: "research_agent_google_genai",
-                description: "Research agent",
-                assistantId: "9dc0ca3b-1aa6-547d-93f0-e21597d2011c",
-              },
-            ],
-          })
-        : copilotKitEndpoint({
-            // 如果主端点/copilotkit不工作，可以切换到备份端点/copilotkit_backup
-            url:
-              process.env.REMOTE_ACTION_URL || "http://localhost:8080/copilotkit",
-            // 备份端点
-            // url: process.env.REMOTE_ACTION_URL || "http://localhost:8000/copilotkit_backup",
-          });
+    // 使用LangGraph代理端点
+    const remoteEndpoint = copilotKitEndpoint({
+      url: "http://localhost:8000/copilotkit", // LangGraph代理的地址（更新为8000端口）
+    });
 
+    // 创建运行时配置
     const runtime = new CopilotRuntime({
       remoteEndpoints: [remoteEndpoint],
     });
 
+    // 将请求传递给LangGraph代理
     const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
       runtime,
-      serviceAdapter: llmAdapter,
+      serviceAdapter: dummyAdapter, // 使用最小化适配器
       endpoint: "/api/copilotkit",
     });
 
-    // 尝试处理请求
-    const response = await handleRequest(req);
-    
-    // 记录响应信息
-    console.log("Response status:", response.status);
-    
-    return response;
+    try {
+      // 处理请求并将结果返回给用户
+      const response = await handleRequest(req);
+      console.log("LangGraph处理响应状态:", response.status);
+      return response;
+    } catch (error) {
+      console.error("处理CopilotKit请求失败:", error);
+      
+      // 提供友好的错误响应
+      return NextResponse.json({
+        response: "抱歉，无法处理您的请求。请稍后再试。"
+      });
+    }
   } catch (error) {
     console.error("Error in copilotkit route:", error);
     

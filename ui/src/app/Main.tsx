@@ -8,6 +8,181 @@ import { Logo } from "@/components/Logo";
 import { useState, useEffect } from "react";
 import { LayoutGrid, BarChart3, Settings, FileText, MessageSquare } from "lucide-react";
 
+// Add type declaration for the window object
+declare global {
+  interface Window {
+    clearCampaignsStorage: () => void;
+    resetCampaignsStorage: () => void;
+  }
+}
+
+// Define a unique storage key for this application
+const STORAGE_KEY = 'marketing-app-campaigns';
+
+// 完全重新实现的存储操作函数
+const storageOps = {
+  // 从localStorage获取活动数据
+  getCampaigns: (): Campaign[] => {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (!data) return [];
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('获取活动数据失败:', error);
+      return [];
+    }
+  },
+
+  // 保存活动数据到localStorage
+  saveCampaigns: (campaigns: Campaign[]): boolean => {
+    try {
+      const jsonData = JSON.stringify(campaigns);
+      localStorage.setItem(STORAGE_KEY, jsonData);
+      console.log('活动数据已保存:', campaigns.length);
+      return true;
+    } catch (error) {
+      console.error('保存活动数据失败:', error);
+      return false;
+    }
+  },
+
+  // 删除指定ID的活动
+  deleteCampaign: (id: string): boolean => {
+    try {
+      // 获取现有活动
+      const campaigns = storageOps.getCampaigns();
+      // 找到要删除的活动索引
+      const index = campaigns.findIndex(c => c.id === id);
+      
+      if (index === -1) {
+        console.error(`找不到ID为 ${id} 的活动`);
+        return false;
+      }
+      
+      // 删除活动
+      campaigns.splice(index, 1);
+      
+      // 保存更新后的活动列表
+      storageOps.saveCampaigns(campaigns);
+      console.log(`已删除ID为 ${id} 的活动，剩余 ${campaigns.length} 个活动`);
+      return true;
+    } catch (error) {
+      console.error('删除活动失败:', error);
+      return false;
+    }
+  },
+
+  // 按标题删除活动
+  deleteCampaignByTitle: async (title: string): Promise<boolean> => {
+    try {
+      // 获取现有活动
+      const campaigns = storageOps.getCampaigns();
+      // 找到要删除的活动索引
+      const index = campaigns.findIndex(c => c.title.toLowerCase() === title.toLowerCase());
+      
+      if (index === -1) {
+        console.error(`找不到标题为 ${title} 的活动`);
+        return false;
+      }
+      
+      // 获取活动ID以便调用后端API
+      const campaignId = campaigns[index].id;
+      
+      console.log(`尝试删除活动ID: ${campaignId}, 标题: ${title}`);
+      
+      // 直接调用后端API删除
+      const response = await fetch(`http://localhost:5000/api/campaigns/${campaignId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`后端API删除活动失败: ${response.statusText}`);
+      }
+      
+      // API调用成功后，更新本地存储
+      campaigns.splice(index, 1);
+      storageOps.saveCampaigns(campaigns);
+      
+      console.log(`成功删除活动标题: ${title}，ID: ${campaignId}`);
+      return true;
+    } catch (error) {
+      console.error('删除活动失败:', error);
+      return false;
+    }
+  },
+  
+  // 添加新活动
+  addCampaign: async (campaign: Campaign): Promise<boolean> => {
+    try {
+      console.log(`尝试添加新活动: ${campaign.title}`);
+      
+      // 直接调用后端API创建记录
+      const response = await fetch('http://localhost:5000/api/campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(campaign)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`后端API创建活动失败: ${response.statusText}`);
+      }
+      
+      // 获取后端返回的新活动数据
+      const createdCampaign = await response.json();
+      console.log(`后端API成功创建活动: ${createdCampaign.id}`);
+      
+      // 获取更新后的活动列表
+      const updatedCampaigns = await fetch('http://localhost:5000/api/campaigns', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }).then(res => {
+        if (!res.ok) throw new Error(`获取更新后的活动失败: ${res.statusText}`);
+        return res.json();
+      });
+      
+      // 更新本地存储
+      storageOps.saveCampaigns(updatedCampaigns);
+      
+      console.log(`成功添加新活动: ${campaign.title}, 当前有 ${updatedCampaigns.length} 个活动`);
+      return true;
+    } catch (error) {
+      console.error('添加活动失败:', error);
+      return false;
+    }
+  },
+  
+  // 清空所有活动
+  clearCampaigns: (): boolean => {
+    try {
+      storageOps.saveCampaigns([]);
+      console.log('已清空所有活动');
+      return true;
+    } catch (error) {
+      console.error('清空活动失败:', error);
+      return false;
+    }
+  },
+  
+  // 重置为默认活动
+  resetToDefaults: (defaultCampaigns: Campaign[]): boolean => {
+    try {
+      storageOps.saveCampaigns(defaultCampaigns);
+      console.log('已重置为默认活动');
+      return true;
+    } catch (error) {
+      console.error('重置活动失败:', error);
+      return false;
+    }
+  }
+};
+
 export default function Main() {
   const model = "google_genai";
   const agent = "research_agent_google_genai";
@@ -45,7 +220,7 @@ export default function Main() {
   const [isClient, setIsClient] = useState(false);
 
   // Add local sample data
-  const dummyCampaigns = [
+  const initialDummyCampaigns = [
     {
       id: "campaign-1",
       title: "Summer Product Promotion",
@@ -83,55 +258,200 @@ export default function Main() {
     }
   ];
 
-  // Detect window size and update isMobile state
+  // 初始化和加载数据
   useEffect(() => {
+    // 客户端渲染检测
+    setIsClient(true);
+    
+    const initializeStorage = () => {
+      // 检查localStorage是否已初始化
+      console.log('检查localStorage是否已初始化...');
+      const existingData = localStorage.getItem(STORAGE_KEY);
+      
+      if (!existingData) {
+        console.log('初始化localStorage，设置默认活动数据');
+        // 初始化默认数据
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialDummyCampaigns));
+        console.log('成功初始化默认活动:', initialDummyCampaigns.length);
+      } else {
+        console.log('localStorage已包含活动数据，无需初始化');
+      }
+    };
+    
+    // 检测窗口大小
     const checkWindowSize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
+    
+    // 初始化localStorage
+    initializeStorage();
+    
+    // 检测窗口大小
     checkWindowSize();
     window.addEventListener('resize', checkWindowSize);
-    return () => window.removeEventListener('resize', checkWindowSize);
-  }, []);
-
-  // Use useEffect to handle client-side rendering
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Load marketing campaign data from MongoDB
-  useEffect(() => {
-    const fetchCampaigns = async () => {
+    
+    // 同步后端和前端数据
+    const syncWithBackend = async () => {
+      console.log('正在同步广告系列数据...');
       try {
-        // Use local data
-        const formattedCampaigns = [...dummyCampaigns];
-        
-        console.log('Using local sample campaign data:', formattedCampaigns);
-        
-        // Update state
-        setState({
-          ...state,
-          campaigns: formattedCampaigns
+        // 获取后端数据
+        const response = await fetch('http://localhost:5000/api/campaigns', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
         });
+        
+        if (!response.ok) {
+          throw new Error(`获取广告系列失败: ${response.statusText}`);
+        }
+        
+        const backendCampaigns = await response.json();
+        console.log('从后端获取的广告系列:', backendCampaigns.length);
+        
+        // 更新本地存储
+        storageOps.saveCampaigns(backendCampaigns);
+        
+        // 更新应用状态
+        setState(prevState => ({
+          model: prevState?.model || model,
+          campaign_brief: prevState?.campaign_brief || "",
+          resources: prevState?.resources || [],
+          report: prevState?.report || "",
+          logs: prevState?.logs || [],
+          campaigns: backendCampaigns
+        }));
+        
+        console.log('广告系列数据同步完成');
       } catch (error) {
-        console.error('Error fetching campaigns:', error);
+        console.error('同步广告系列数据失败:', error);
+        
+        // 如果同步失败，使用本地存储数据
+        const localCampaigns = storageOps.getCampaigns();
+        setState(prevState => ({
+          model: prevState?.model || model,
+          campaign_brief: prevState?.campaign_brief || "",
+          resources: prevState?.resources || [],
+          report: prevState?.report || "",
+          logs: prevState?.logs || [],
+          campaigns: localCampaigns
+        }));
       }
     };
-
-    // Get campaigns when page loads
-    fetchCampaigns();
+    
+    // 立即执行首次同步
+    syncWithBackend();
+    
+    // 设置定期同步
+    const syncInterval = setInterval(syncWithBackend, 30000);
+    
+    // 设置窗口全局方法
+    window.clearCampaignsStorage = () => {
+      storageOps.clearCampaigns();
+      
+      // 更新应用状态以反映清空的活动列表
+      setState(prevState => ({
+        model: prevState?.model || model,
+        campaign_brief: prevState?.campaign_brief || "",
+        resources: prevState?.resources || [],
+        report: prevState?.report || "",
+        logs: prevState?.logs || [],
+        campaigns: []
+      }));
+      
+      console.log('已清空活动数据并更新应用状态');
+    };
+    
+    window.resetCampaignsStorage = () => {
+      storageOps.resetToDefaults(initialDummyCampaigns);
+      
+      // 更新应用状态以反映默认活动列表
+      setState(prevState => ({
+        model: prevState?.model || model,
+        campaign_brief: prevState?.campaign_brief || "",
+        resources: prevState?.resources || [],
+        report: prevState?.report || "",
+        logs: prevState?.logs || [],
+        campaigns: initialDummyCampaigns
+      }));
+      
+      console.log('已重置为默认活动数据并更新应用状态');
+    };
+    
+    // 清理函数
+    return () => {
+      window.removeEventListener('resize', checkWindowSize);
+      clearInterval(syncInterval);
+    };
   }, []);
 
   // Define new marketing campaign creation action
   useCopilotAction({
     name: "CreateNewCampaign",
     description: "Create a new marketing campaign",
-    parameters: [],
-    handler: () => {
-      // Clear logs
-      setState({ ...state, logs: [] });
-      // Switch to campaigns view
+    parameters: [
+      {
+        name: "campaignTitle",
+        type: "string",
+        description: "The title for the new campaign (optional)"
+      }
+    ],
+    handler: async (params) => {
+      // 记录收到的参数
+      console.log('CreateNewCampaign被触发，参数:', params);
+      
+      // 清空日志并切换到活动视图
       setActiveView("campaigns");
+
+      // 将之前传入的标题参数提取出来，如果不存在则使用默认标题
+      const campaignTitle = params.campaignTitle || `新营销活动 ${new Date().toLocaleDateString()}`;
+      console.log(`准备创建活动：${campaignTitle}`);
+
+      // 创建活动对象
+      const newCampaign = {
+        id: `campaign-${Date.now()}`,
+        title: campaignTitle.trim(),
+        status: "draft" as const,
+        brief: "通过AI助手创建的营销活动",
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        // 调用LangGraph直接处理CreateCampaign工具调用
+        // 通过更新state对象，LangGraph会处理Campaign的创建
+        setState((prevState?: AgentState) => {
+          const currentState = prevState || {
+            model,
+            campaign_brief: "",
+            resources: [],
+            report: "",
+            logs: [],
+            campaigns: []
+          };
+          
+          return {
+            model: currentState.model,
+            campaign_brief: currentState.campaign_brief,
+            resources: currentState.resources,
+            report: currentState.report,
+            logs: currentState.logs,
+            campaigns: [...(currentState.campaigns || []), newCampaign]
+          };
+        });
+
+        // 确保在UI中看到结果
+        const localCampaigns = storageOps.getCampaigns();
+        const updatedCampaigns = [...localCampaigns, newCampaign];
+        storageOps.saveCampaigns(updatedCampaigns);
+
+        // 标记已创建活动
+        setCampaignCreated(true);
+        
+        return `成功创建活动 "${campaignTitle}"！您可以在活动列表中查看它。`;
+      } catch (error) {
+        console.error('创建活动失败:', error);
+        return `创建活动失败: ${(error as Error).message || '未知错误'}`;
+      }
     }
   });
 
@@ -144,6 +464,80 @@ export default function Main() {
       // Clear logs
       setState({ ...state, logs: [] });
       // No special operation, AI will handle the reply
+    }
+  });
+
+  // Define delete campaign action
+  useCopilotAction({
+    name: "DeleteCampaign",
+    description: "Delete a marketing campaign by its title",
+    parameters: [
+      {
+        name: "campaignTitle",
+        type: "string",
+        description: "The exact title of the campaign to delete"
+      }
+    ],
+    handler: async (params) => {
+      // 记录收到的参数
+      console.log('DeleteCampaign被触发，参数:', params);
+      
+      // 将传入的标题参数提取出来
+      const { campaignTitle } = params;
+      
+      if (!campaignTitle) {
+        return "无法删除活动：未提供活动标题。";
+      }
+      
+      try {
+        console.log(`准备删除活动：${campaignTitle}`);
+        
+        // 使用LangGraph处理删除
+        // 首先在当前状态中查找活动
+        const campaigns = state?.campaigns || [];
+        const campaignToDelete = campaigns.find(c => 
+          c.title.toLowerCase() === campaignTitle.toLowerCase()
+        );
+        
+        if (!campaignToDelete) {
+          return `找不到标题为"${campaignTitle}"的活动。请检查标题是否正确。`;
+        }
+        
+        // 更新状态，删除活动
+        setState((prevState?: AgentState) => {
+          const currentState = prevState || {
+            model,
+            campaign_brief: "",
+            resources: [],
+            report: "",
+            logs: [],
+            campaigns: []
+          };
+          
+          return {
+            model: currentState.model,
+            campaign_brief: currentState.campaign_brief,
+            resources: currentState.resources,
+            report: currentState.report,
+            logs: currentState.logs,
+            campaigns: (currentState.campaigns || []).filter(c => 
+              c.title.toLowerCase() !== campaignTitle.toLowerCase()
+            )
+          };
+        });
+        
+        // 确保在UI中看到更新
+        const localCampaigns = storageOps.getCampaigns();
+        const updatedCampaigns = localCampaigns.filter(c => 
+          c.title.toLowerCase() !== campaignTitle.toLowerCase()
+        );
+        storageOps.saveCampaigns(updatedCampaigns);
+        
+        return `已成功删除活动"${campaignTitle}"。`;
+      } catch (error) {
+        console.error('删除活动失败:', error);
+        return `删除活动失败: ${(error as Error).message || '未知错误'}`;
+      }
     }
   });
 
@@ -165,6 +559,26 @@ export default function Main() {
     2. Campaign Goals: What do you want to achieve with this campaign? (e.g., increase website traffic, generate leads, boost sales)
     3. Marketing Channels: Where will you reach your audience? (e.g., social media, email, search ads)
     4. Campaign Budget: How much are you willing to spend?
+
+    CAMPAIGN DELETION INSTRUCTIONS:
+    If the user wants to delete a campaign, help them by using the DeleteCampaign tool. Be careful to get the exact title right.
+    1. When a user says something like "delete campaign", "remove campaign", or specifically mentions a campaign title to delete, recognize this as a delete intent.
+    2. If the user doesn't specify which campaign to delete, ask them "Which campaign would you like to delete? Please provide the exact title."
+    3. Once they provide a title, confirm by asking "Are you sure you want to delete the campaign titled '[title]'?"
+    4. After confirmation, call the DeleteCampaign tool with the exact campaign title as parameter.
+    5. The parameter name is "campaignTitle" and it must match exactly the title of an existing campaign.
+    6. If there's an error, explain that the campaign couldn't be found and ask the user to check the title.
+    
+    CAMPAIGN CREATION INSTRUCTIONS:
+    If the user asks to "create a campaign", "add a new campaign", "new campaign", or anything similar:
+    1. Recognize this as a campaign creation intent and call the CreateNewCampaign tool.
+    2. If the user provides a specific title (e.g., "create a summer campaign"), pass it as the "campaignTitle" parameter.
+    3. If no specific title is mentioned, leave the parameter empty to use the default title.
+    4. After creating a campaign, tell the user it was successful and they can see it in their campaigns list.
+    
+    If the user wants to see their campaigns, tell them they can view their campaigns in the campaigns panel on the left side of the screen.
+    
+    NEVER SUGGEST RELOADING THE PAGE. All operations should update the state directly without page reloads.
     `
   }, [hasAskedAboutCampaign]);
 
@@ -199,210 +613,10 @@ export default function Main() {
               setTimeout(() => {
                 submitButton.click();
                 
-                // Wait for AI response before checking if a new campaign is needed
-                setTimeout(() => {
-                  const defaultTitle = "New Marketing Campaign";
-                  
-                  // First, try to get the current campaign list
-                  const campaigns = state.campaigns || [];
-                  const existingCampaign = campaigns.find(c => c.title === defaultTitle);
-                  
-                  // If no campaign with the same name exists, create a new one
-                  if (!existingCampaign) {
-                    // Create new campaign data
-                    const newCampaignData = {
-                      title: defaultTitle,
-                      status: 'draft',
-                      description: "",
-                      targetAudience: {
-                        ageRange: "",
-                        gender: "",
-                        location: ""
-                      },
-                      goals: "",
-                      marketingChannels: [],
-                      budget: {
-                        amount: 0,
-                        currency: "USD"
-                      }
-                    };
-                    
-                    // Save to MongoDB
-                    fetch('http://localhost:5000/api/campaigns', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify(newCampaignData),
-                    })
-                    .then(response => response.json())
-                    .then(savedCampaign => {
-                      console.log('Campaign saved to database:', savedCampaign);
-                      
-                      // Format saved campaign for frontend
-                      const formattedCampaign = {
-                        id: savedCampaign.id || savedCampaign._id,
-                        title: savedCampaign.title,
-                        status: savedCampaign.status as 'active' | 'draft' | 'completed' | 'scheduled',
-                        brief: savedCampaign.description || '',
-                        createdAt: savedCampaign.createdAt
-                      };
-                      
-                      // Update state
-                      setState({
-                        ...state,
-                        campaigns: [...campaigns, formattedCampaign]
-                      });
-                      
-                      // Mark campaign as created, prepare to show option buttons
-                      setCampaignCreated(true);
-                      
-                      // Send follow-up guidance message in 1500ms
-                      setTimeout(() => {
-                        // Find input element
-                        const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
-                        const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
-                        
-                        if (messageInput && submitButton) {
-                          // Automatically send system message
-                          messageInput.value = "I need help customizing this campaign";
-                          messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                          submitButton.click();
-                          
-                          // 800ms later, show option buttons
-                          setTimeout(() => {
-                            setShowCampaignOptions(true);
-                          }, 800);
-                        }
-                      }, 1500);
-                    })
-                    .catch(error => {
-                      console.error('Error saving campaign:', error);
-                      
-                      // Even if API call fails, create local campaign (fallback solution)
-                      const newCampaign = {
-                        id: Math.random().toString(36).substring(2, 15),
-                        title: defaultTitle,
-                        status: 'draft' as const,
-                        brief: "",
-                        createdAt: new Date().toISOString()
-                      };
-                      
-                      setState({
-                        ...state,
-                        campaigns: [...campaigns, newCampaign]
-                      });
-                      
-                      setCampaignCreated(true);
-                    });
-                  }
-                }, 1000);
-              }, 100);
-            } else {
-              // Fallback solution: trigger enter key
-              setTimeout(() => {
-                messageInput.dispatchEvent(new KeyboardEvent('keydown', {
-                  key: 'Enter',
-                  code: 'Enter',
-                  keyCode: 13,
-                  which: 13,
-                  bubbles: true,
-                  cancelable: true
-                }));
-                
-                // Immediately switch to campaigns view
-                setActiveView("campaigns");
-                
-                // Wait for AI response before checking if a new campaign is needed
-                setTimeout(() => {
-                  const defaultTitle = "New Marketing Campaign";
-                  
-                  // First, try to get the current campaign list
-                  const campaigns = state.campaigns || [];
-                  const existingCampaign = campaigns.find(c => c.title === defaultTitle);
-                  
-                  // If no campaign with the same name exists, create a new one
-                  if (!existingCampaign) {
-                    // Use the same code to create and save campaign to MongoDB
-                    const newCampaignData = {
-                      title: defaultTitle,
-                      status: 'draft',
-                      description: "",
-                      targetAudience: {
-                        ageRange: "",
-                        gender: "",
-                        location: ""
-                      },
-                      goals: "",
-                      marketingChannels: [],
-                      budget: {
-                        amount: 0,
-                        currency: "USD"
-                      }
-                    };
-                    
-                    // Save to MongoDB
-                    fetch('http://localhost:5000/api/campaigns', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify(newCampaignData),
-                    })
-                    .then(response => response.json())
-                    .then(savedCampaign => {
-                      console.log('Campaign saved to database:', savedCampaign);
-                      
-                      const formattedCampaign = {
-                        id: savedCampaign.id || savedCampaign._id,
-                        title: savedCampaign.title,
-                        status: savedCampaign.status as 'active' | 'draft' | 'completed' | 'scheduled',
-                        brief: savedCampaign.description || '',
-                        createdAt: savedCampaign.createdAt
-                      };
-                      
-                      setState({
-                        ...state,
-                        campaigns: [...campaigns, formattedCampaign]
-                      });
-                      
-                      setCampaignCreated(true);
-                      
-                      setTimeout(() => {
-                        const messageInput = document.querySelector('.copilotKitInput textarea') as HTMLTextAreaElement;
-                        const submitButton = document.querySelector('.copilotKitInputControls button[type="submit"]') as HTMLButtonElement;
-                        
-                        if (messageInput && submitButton) {
-                          messageInput.value = "I need help customizing this campaign";
-                          messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                          submitButton.click();
-                          
-                          setTimeout(() => {
-                            setShowCampaignOptions(true);
-                          }, 800);
-                        }
-                      }, 1500);
-                    })
-                    .catch(error => {
-                      console.error('Error saving campaign:', error);
-                      
-                      // Fallback solution
-                      const newCampaign = {
-                        id: Math.random().toString(36).substring(2, 15),
-                        title: defaultTitle,
-                        status: 'draft' as const,
-                        brief: "",
-                        createdAt: new Date().toISOString()
-                      };
-                      
-                      setState({
-                        ...state,
-                        campaigns: [...campaigns, newCampaign]
-                      });
-                      
-                      setCampaignCreated(true);
-                    });
-                  }
+                // Wait for AI to respond asking for campaign name
+                setTimeout(async () => {
+                  console.log("等待用户输入活动名称...");
+                  // 不会立即创建活动，而是等待用户输入名称后，由AI触发CreateNewCampaign操作
                 }, 1000);
               }, 100);
             }
@@ -562,10 +776,156 @@ export default function Main() {
                 onBack={() => setSelectedCampaign(null)}
               />
             ) : (
-              <CampaignList 
-                campaigns={state.campaigns || []} 
-                onSelectCampaign={(campaign: Campaign) => setSelectedCampaign(campaign)}
-              />
+              <>
+                <div className="w-full sticky top-0 bg-[#1e1e20] pt-4 px-4 md:px-10 pb-2 z-10">
+                  <div className="flex justify-between items-center mb-2">
+                    <h2 className="text-xl font-semibold text-white">Marketing Campaigns</h2>
+                    <button 
+                      className="px-3 py-1.5 bg-[#5D4EFF] text-white text-sm rounded-md flex items-center hover:bg-[#4c3fe6] transition-colors"
+                      onClick={async () => {
+                        // 创建新活动
+                        try {
+                          // 生成唯一ID和默认标题
+                          const newId = `campaign-${Date.now()}`;
+                          let newTitle = "新活动";
+                          
+                          // 获取现有活动
+                          const existingCampaigns = storageOps.getCampaigns();
+                          
+                          // 确保标题唯一
+                          let counter = 1;
+                          while (existingCampaigns.some((c: Campaign) => c.title === newTitle)) {
+                            newTitle = `新活动 ${counter}`;
+                            counter++;
+                          }
+                          
+                          // 创建新活动对象
+                          const newCampaign = {
+                            id: newId,
+                            title: newTitle,
+                            status: "draft" as const,
+                            brief: "点击编辑活动详情",
+                            createdAt: new Date().toISOString()
+                          };
+                          
+                          console.log("UI创建新活动:", newCampaign);
+                          
+                          // 直接调用后端API创建记录
+                          const response = await fetch('http://localhost:5000/api/campaigns', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(newCampaign)
+                          });
+                          
+                          if (!response.ok) {
+                            throw new Error(`后端API创建活动失败: ${response.statusText}`);
+                          }
+                          
+                          // 获取后端返回的新活动数据
+                          const createdCampaign = await response.json();
+                          console.log("后端创建的活动:", createdCampaign);
+                          
+                          // 获取更新后的活动列表
+                          const updatedCampaignsResponse = await fetch('http://localhost:5000/api/campaigns', {
+                            method: 'GET',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            }
+                          });
+                          
+                          if (!updatedCampaignsResponse.ok) {
+                            throw new Error(`获取更新后的活动列表失败: ${updatedCampaignsResponse.statusText}`);
+                          }
+                          
+                          const updatedCampaigns = await updatedCampaignsResponse.json();
+                          
+                          // 更新本地存储
+                          storageOps.saveCampaigns(updatedCampaigns);
+                          
+                          // 更新应用状态
+                          setState(prevState => ({
+                            model: prevState?.model || model,
+                            campaign_brief: prevState?.campaign_brief || "",
+                            resources: prevState?.resources || [],
+                            report: prevState?.report || "",
+                            logs: prevState?.logs || [],
+                            campaigns: updatedCampaigns
+                          }));
+                          
+                          console.log(`UI添加 - 成功创建新活动 "${newTitle}"`);
+                          
+                          // 选择新创建的活动
+                          setTimeout(() => {
+                            // 尝试从更新后的活动列表中找到刚创建的活动
+                            const justCreatedCampaign = updatedCampaigns.find((c: Campaign) => c.id === createdCampaign.id || c.id === newId);
+                            if (justCreatedCampaign) {
+                              setSelectedCampaign(justCreatedCampaign);
+                            }
+                          }, 100);
+                        } catch (error) {
+                          console.error('创建新活动时出错:', error);
+                        }
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                        <path d="M12 5v14M5 12h14"></path>
+                      </svg>
+                      New Campaign
+                    </button>
+                  </div>
+                </div>
+                
+                <CampaignList 
+                  campaigns={state.campaigns || []} 
+                  onSelectCampaign={(campaign: Campaign) => setSelectedCampaign(campaign)}
+                  onDeleteCampaign={(campaign: Campaign) => {
+                    // 确认删除
+                    if (window.confirm(`确定要删除"${campaign.title}"吗？`)) {
+                      console.log(`UI直接删除活动: ${campaign.title}`);
+                      
+                      try {
+                        // 记录要删除的活动ID
+                        const idToDelete = campaign.id;
+                        
+                        // 删除活动
+                        const success = storageOps.deleteCampaign(idToDelete);
+                        
+                        if (!success) {
+                          console.error(`UI删除活动 ${campaign.title} 失败`);
+                          return;
+                        }
+                        
+                        // 从localStorage重新获取最新的活动列表
+                        const afterDelete = storageOps.getCampaigns();
+                        console.log(`删除后有 ${afterDelete.length} 个活动`);
+                        
+                        // 验证活动是否已删除
+                        const stillExists = afterDelete.some(c => c.id === idToDelete);
+                        if (stillExists) {
+                          console.error(`UI删除失败 - 活动 ${campaign.title} 仍然存在`);
+                          return;
+                        }
+                        
+                        // 更新应用状态
+                        setState(prevState => ({
+                          model: prevState?.model || model,
+                          campaign_brief: prevState?.campaign_brief || "",
+                          resources: prevState?.resources || [],
+                          report: prevState?.report || "",
+                          logs: prevState?.logs || [],
+                          campaigns: afterDelete
+                        }));
+                        
+                        console.log(`UI删除成功: ${campaign.title}`);
+                      } catch (error) {
+                        console.error('UI删除活动时出错:', error);
+                      }
+                    }
+                  }}
+                />
+              </>
             )}
           </div>
         );
@@ -650,6 +1010,107 @@ export default function Main() {
             } as any
           }
         >
+          {/* 聊天工具栏 */}
+          <div className="absolute top-0 right-0 p-2 flex z-10">
+            <button 
+              className="p-1.5 rounded-md bg-[#272729] text-[#5D4EFF] hover:bg-[#35353a] transition-colors mr-2"
+              title="Create a new campaign via chat"
+              onClick={async () => {
+                // 创建新活动
+                try {
+                  // 生成唯一ID和默认标题
+                  const newId = `campaign-${Date.now()}`;
+                  let newTitle = "新活动";
+                  
+                  // 获取现有活动
+                  const existingCampaigns = storageOps.getCampaigns();
+                  
+                  // 确保标题唯一
+                  let counter = 1;
+                  while (existingCampaigns.some((c: Campaign) => c.title === newTitle)) {
+                    newTitle = `新活动 ${counter}`;
+                    counter++;
+                  }
+                  
+                  // 创建新活动对象
+                  const newCampaign = {
+                    id: newId,
+                    title: newTitle,
+                    status: "draft" as const,
+                    brief: "点击编辑活动详情",
+                    createdAt: new Date().toISOString()
+                  };
+                  
+                  console.log("UI创建新活动:", newCampaign);
+                  
+                  // 直接调用后端API创建记录
+                  console.log("发送POST请求到 http://localhost:5000/api/campaigns");
+                  const response = await fetch('http://localhost:5000/api/campaigns', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newCampaign)
+                  });
+                  
+                  console.log("后端API响应状态:", response.status, response.statusText);
+                  
+                  if (!response.ok) {
+                    throw new Error(`后端API创建活动失败: ${response.status} ${response.statusText}`);
+                  }
+                  
+                  // 获取后端返回的新活动数据
+                  const createdCampaign = await response.json();
+                  console.log("后端创建的活动:", createdCampaign);
+                  
+                  // 获取更新后的活动列表
+                  const updatedCampaignsResponse = await fetch('http://localhost:5000/api/campaigns', {
+                    method: 'GET',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    }
+                  });
+                  
+                  if (!updatedCampaignsResponse.ok) {
+                    throw new Error(`获取更新后的活动列表失败: ${updatedCampaignsResponse.status} ${updatedCampaignsResponse.statusText}`);
+                  }
+                  
+                  const updatedCampaigns = await updatedCampaignsResponse.json();
+                  
+                  // 更新本地存储
+                  storageOps.saveCampaigns(updatedCampaigns);
+                  
+                  // 更新应用状态
+                  setState(prevState => ({
+                    model: prevState?.model || model,
+                    campaign_brief: prevState?.campaign_brief || "",
+                    resources: prevState?.resources || [],
+                    report: prevState?.report || "",
+                    logs: prevState?.logs || [],
+                    campaigns: updatedCampaigns
+                  }));
+                  
+                  console.log(`UI添加 - 成功创建新活动 "${newTitle}"`);
+                  
+                  // 选择新创建的活动
+                  setTimeout(() => {
+                    // 尝试从更新后的活动列表中找到刚创建的活动
+                    const justCreatedCampaign = updatedCampaigns.find((c: Campaign) => c.id === createdCampaign.id || c.id === newId);
+                    if (justCreatedCampaign) {
+                      setSelectedCampaign(justCreatedCampaign);
+                    }
+                  }, 100);
+                } catch (error) {
+                  console.error('创建新活动时出错:', error);
+                }
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+            </button>
+          </div>
+
           <style jsx global>{`
             .copilot-chat input[type="text"], 
             .copilot-chat textarea {
@@ -888,11 +1349,40 @@ export default function Main() {
               // Clear the logs before starting a new campaign
               setState({ ...state, logs: [] });
               await new Promise((resolve) => setTimeout(resolve, 30));
+              
+              // 检查是否是删除活动的请求
+              const deleteMatch = message.toLowerCase().match(/delete(?:\s+the)?\s+(?:campaign)?\s*["']?([^"']+)["']?/i);
+              if (deleteMatch) {
+                const campaignTitle = deleteMatch[1].trim();
+                console.log(`DEBUG: 通过聊天消息检测到删除请求：${campaignTitle}`);
+                
+                // 获取当前活动列表
+                const storedCampaignsStr = localStorage.getItem(STORAGE_KEY);
+                if (storedCampaignsStr) {
+                  const storedCampaigns = JSON.parse(storedCampaignsStr);
+                  const campaignExists = storedCampaigns.some((c: Campaign) => 
+                    c.title.toLowerCase() === campaignTitle.toLowerCase()
+                  );
+                  
+                  if (campaignExists) {
+                    console.log(`DEBUG: 找到要删除的活动：${campaignTitle}`);
+                    // 这里不需要直接调用 DeleteCampaign，AI助手会自动调用
+                  }
+                }
+              }
+              
+              // 检查是否是创建活动的请求
+              const createMatch = message.toLowerCase().match(/create(?:\s+a)?\s+(?:new)?\s+(?:campaign|marketing campaign)(?:\s+(?:called|named|titled)\s+["']?([^"']+)["']?)?/i);
+              if (createMatch) {
+                const campaignTitle = createMatch[1] ? createMatch[1].trim() : null;
+                console.log(`DEBUG: 通过聊天消息检测到创建请求：${campaignTitle || '默认标题'}`);
+                // 这里不需要直接调用 CreateNewCampaign，AI助手会自动调用
+              }
             }}
             labels={{
               title: "Marketing Assistant",
-              initial: "Hello! I'm your marketing assistant. How can I help you today?",
               placeholder: "Type your message...",
+              initial: "Hello! I'm your marketing assistant. How can I help you today? You can ask me to create or delete campaigns."
             }}
           />
           

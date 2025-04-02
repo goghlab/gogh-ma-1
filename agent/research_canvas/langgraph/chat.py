@@ -11,6 +11,8 @@ from research_canvas.langgraph.model import get_model
 from research_canvas.langgraph.download import get_resource
 import uuid
 import datetime
+import requests
+import json
 
 
 @tool
@@ -268,6 +270,20 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> \
             campaigns = state.get("campaigns", [])
             campaigns.append(new_campaign)
             
+            # 向MongoDB发送请求，保存活动
+            try:
+                print(f"发送活动到MongoDB: {new_campaign['title']}")
+                response = requests.post("http://localhost:5000/api/campaigns", 
+                                         json=new_campaign, 
+                                         headers={"Content-Type": "application/json"})
+                
+                if response.status_code == 201:
+                    print(f"活动成功保存到MongoDB: {response.json()}")
+                else:
+                    print(f"MongoDB API错误: {response.status_code} {response.text}")
+            except Exception as e:
+                print(f"发送活动到MongoDB出错: {str(e)}")
+            
             return Command(
                 goto="chat_node",
                 update={
@@ -314,6 +330,12 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> \
                     }
                 )
         if ai_message.tool_calls[0]["name"] == "CreateNewCampaign":
+            # 引导用户创建新的营销活动
+            # 在这里我们只返回提示消息，后续用户提供标题后会调用CreateCampaign工具
+            
+            # 记录用户请求创建新活动
+            print("用户请求创建新活动，等待提供标题")
+            
             return Command(
                 goto="chat_node",
                 update={
