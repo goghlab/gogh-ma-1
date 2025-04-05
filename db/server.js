@@ -18,60 +18,60 @@ const CAMPAIGNS_FILE = path.resolve(__dirname, 'campaigns.json');
 const initialCampaigns = [
   {
     id: uuidv4(),
-    title: "夏季新品促销活动",
+    title: "Summer Product Promotion",
     status: "active",
-    brief: "推广我们新的夏季产品线，目标是提高销售额和品牌曝光度。",
+    brief: "Promote our new summer product line",
     createdAt: new Date(2023, 4, 15).toISOString(),
-    targetAudience: {
-      ageRange: "18-35",
-      gender: "所有",
-      location: "全国一线城市"
+    campaignBrief: {
+      content: "Promote our new summer product line with the goal of increasing sales and brand exposure. This campaign will focus on our latest summer collection including clothing, accessories, and home goods.",
+      lastUpdated: new Date(2023, 4, 15).toISOString()
     },
-    goals: "提高品牌知名度，增加30%的网站流量，销售增长25%",
-    marketingChannels: ["社交媒体", "影响者营销", "电子邮件"],
-    budget: {
-      amount: 50000,
-      currency: "CNY"
+    goals: {
+      content: "Increase brand awareness, boost website traffic by 30%, and achieve 25% sales growth through targeted marketing efforts.",
+      lastUpdated: new Date(2023, 4, 15).toISOString()
     },
-    description: "夏季系列产品推广，包括新款服装、配饰和家居用品。"
+    marketingChannels: {
+      channels: ["Social Media", "Influencer Marketing", "Email Marketing"],
+      lastUpdated: new Date(2023, 4, 15).toISOString()
+    }
   },
   {
     id: uuidv4(),
-    title: "会员忠诚度计划",
+    title: "Customer Loyalty Program",
     status: "draft",
-    brief: "为现有客户建立忠诚度计划，鼓励重复购买并提高客户保留率。",
+    brief: "Create a loyalty program for existing customers",
     createdAt: new Date(2023, 5, 10).toISOString(),
-    targetAudience: {
-      ageRange: "25-55",
-      gender: "所有",
-      location: "全国"
+    campaignBrief: {
+      content: "Create a loyalty program for existing customers to encourage repeat purchases and improve retention. Offer special discounts, early access, and exclusive events for loyal customers.",
+      lastUpdated: new Date(2023, 5, 10).toISOString()
     },
-    goals: "提高客户终身价值，增加会员计划注册，提高重复购买率",
-    marketingChannels: ["电子邮件", "移动应用", "直接营销"],
-    budget: {
-      amount: 30000,
-      currency: "CNY"
+    goals: {
+      content: "Increase customer lifetime value, boost membership sign-ups, and improve repeat purchase rate through personalized rewards.",
+      lastUpdated: new Date(2023, 5, 10).toISOString()
     },
-    description: "为忠实客户提供特别折扣、优先购买权和专属活动。"
+    marketingChannels: {
+      channels: ["Email", "Mobile App", "Direct Marketing"],
+      lastUpdated: new Date(2023, 5, 10).toISOString()
+    }
   },
   {
     id: uuidv4(),
-    title: "内容营销策略",
+    title: "Content Marketing Strategy",
     status: "completed",
-    brief: "创建高质量的内容以吸引新受众并建立我们在行业内的专业形象。",
+    brief: "Create high-quality content to attract new audiences",
     createdAt: new Date(2023, 3, 22).toISOString(),
-    targetAudience: {
-      ageRange: "20-45",
-      gender: "所有",
-      location: "全国"
+    campaignBrief: {
+      content: "Create high-quality content to attract new audiences and establish our professional image in the industry. Focus on delivering value through educational and engaging content.",
+      lastUpdated: new Date(2023, 3, 22).toISOString()
     },
-    goals: "增加网站流量，提高社交媒体参与度，增加转化率",
-    marketingChannels: ["博客", "社交媒体", "电子书"],
-    budget: {
-      amount: 20000,
-      currency: "CNY"
+    goals: {
+      content: "Increase website traffic, improve social media engagement, and boost conversion rates through valuable content creation.",
+      lastUpdated: new Date(2023, 3, 22).toISOString()
     },
-    description: "创建和分发与目标受众相关的价值内容。"
+    marketingChannels: {
+      channels: ["Blog", "Social Media", "eBooks"],
+      lastUpdated: new Date(2023, 3, 22).toISOString()
+    }
   },
   {
     id: uuidv4(),

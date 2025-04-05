@@ -5,22 +5,65 @@
     "status": "active",
     "brief": "Promote our new summer product line, aiming to increase sales and brand exposure.",
     "createdAt": "2023-05-14T16:00:00.000Z",
-    "targetAudience": {
-      "ageRange": "18-35",
-      "gender": "All",
-      "location": "National Tier-1 Cities"
+    "keyOffer": {
+      "content": "Summer Flash Sale: 30% off on new arrivals, Limited time offer: Free beach bag with purchases over $100",
+      "lastUpdated": "2023-05-14T16:00:00.000Z"
     },
-    "goals": "Increase brand awareness, boost website traffic by 30%, achieve 25% sales growth",
-    "marketingChannels": [
-      "Social Media",
-      "Influencer Marketing",
-      "Email"
-    ],
-    "budget": {
-      "amount": 50000,
-      "currency": "USD"
-    },
-    "description": "Summer series product promotion, including new clothing, accessories, and home goods."
+    "socialMediaChannels": ["Facebook", "Instagram", "X"],
+    "campaignBlueprint": {
+      "facebook": {
+        "posts": [
+          {
+            "type": "post",
+            "content": "🌟 Summer Sale is Here!\n\nSpecial Offer: 20% OFF storewide, plus extra 15% OFF on new arrivals.\n\nCome find your perfect summer items!",
+            "hashtags": ["SummerSale", "NewCollection", "Fashion"],
+            "mediaUrl": null,
+            "mediaType": "image",
+            "lastEdited": "2023-05-14T16:00:00.000Z"
+          },
+          {
+            "type": "post",
+            "content": "✨ Exclusive Deal!\n\nGet a FREE luxury gift with purchases over $100\n\nLimited quantity, shop now!",
+            "hashtags": ["ExclusiveOffer", "GiftWithPurchase", "LimitedTime"],
+            "mediaUrl": null,
+            "mediaType": "image",
+            "lastEdited": "2023-05-14T16:00:00.000Z"
+          }
+        ]
+      },
+      "instagram": {
+        "posts": [
+          {
+            "type": "post",
+            "content": "✨ Cool Summer Vibes!\n\nNew arrivals in store\n\nLimited Time: 15% OFF on all new items",
+            "hashtags": ["SummerFashion", "NewArrivals", "Style"],
+            "mediaUrl": null,
+            "mediaType": "image",
+            "lastEdited": "2023-05-14T16:00:00.000Z"
+          },
+          {
+            "type": "reel",
+            "content": "👗 Style Tips\n\nSummer Collection Styling Guide\n\nSwipe to see the perfect summer looks!",
+            "hashtags": ["StyleGuide", "FashionTips"],
+            "mediaUrl": null,
+            "mediaType": "video",
+            "lastEdited": "2023-05-14T16:00:00.000Z"
+          }
+        ]
+      },
+      "x": {
+        "posts": [
+          {
+            "type": "post",
+            "content": "🎉 Summer Collection is LIVE! Limited time offers, shop now before they're gone!",
+            "hashtags": ["SummerCollection", "Fashion"],
+            "mediaUrl": null,
+            "mediaType": "image",
+            "lastEdited": "2023-05-14T16:00:00.000Z"
+          }
+        ]
+      }
+    }
   },
   {
     "id": "d64d1a95-8d53-4f26-bb5b-b442a3dd773a",
@@ -28,21 +71,11 @@
     "status": "draft",
     "brief": "Establish a loyalty program for existing customers to encourage repeat purchases and improve retention rates.",
     "createdAt": "2023-06-09T16:00:00.000Z",
-    "targetAudience": {
-      "ageRange": "25-55",
-      "gender": "All",
-      "location": "Nationwide"
+    "keyOffer": {
+      "content": "Member exclusive: 25% off first purchase, Double points on all transactions, Free premium membership upgrade for first 500 sign-ups",
+      "lastUpdated": "2023-06-09T16:00:00.000Z"
     },
-    "goals": "Increase customer lifetime value, boost membership sign-ups, improve repeat purchase rate",
-    "marketingChannels": [
-      "Email",
-      "Mobile App",
-      "Direct Marketing"
-    ],
-    "budget": {
-      "amount": 30000,
-      "currency": "USD"
-    },
+    "socialMediaChannels": ["Facebook", "Instagram", "X"],
     "description": "Provide special discounts, priority purchase rights, and exclusive events for loyal customers."
   },
   {
@@ -51,21 +84,11 @@
     "status": "completed",
     "brief": "Create high-quality content to attract new audiences and establish our professional image in the industry.",
     "createdAt": "2023-04-21T16:00:00.000Z",
-    "targetAudience": {
-      "ageRange": "20-45",
-      "gender": "All",
-      "location": "Nationwide"
+    "keyOffer": {
+      "content": "Flash Deal: Buy 2 Get 1 Free, Special Bundle Offers: Save up to 40%, Seasonal Clearance: Additional 15% off on sale items",
+      "lastUpdated": "2023-04-21T16:00:00.000Z"
     },
-    "goals": "Increase website traffic, improve social media engagement, boost conversion rates",
-    "marketingChannels": [
-      "Blog",
-      "Social Media",
-      "E-books"
-    ],
-    "budget": {
-      "amount": 20000,
-      "currency": "USD"
-    },
+    "socialMediaChannels": ["Facebook", "Instagram", "X"],
     "description": "Create and distribute valuable content relevant to target audience."
   },
   {
@@ -74,22 +97,11 @@
     "status": "scheduled",
     "brief": "Prepare special promotions for the upcoming holiday season to boost sales.",
     "createdAt": "2023-07-04T16:00:00.000Z",
-    "targetAudience": {
-      "ageRange": "All",
-      "gender": "All",
-      "location": "Nationwide"
+    "keyOffer": {
+      "content": "Holiday Special: 40% off on all items, Free gift wrapping service, Same-day delivery for orders before 3PM",
+      "lastUpdated": "2023-07-04T16:00:00.000Z"
     },
-    "goals": "Increase holiday season sales, attract new customers, clear inventory",
-    "marketingChannels": [
-      "TV Ads",
-      "Social Media",
-      "Email",
-      "Offline Events"
-    ],
-    "budget": {
-      "amount": 100000,
-      "currency": "USD"
-    },
+    "socialMediaChannels": ["Facebook", "Instagram", "X"],
     "description": "Holiday limited-time offers, including special gift wrapping and delivery options."
   },
   {
@@ -98,21 +110,11 @@
     "status": "draft",
     "brief": "Plan a major launch event for the new product line.",
     "createdAt": "2023-08-19T16:00:00.000Z",
-    "targetAudience": {
-      "ageRange": "25-40",
-      "gender": "All",
-      "location": "Beijing, Shanghai, Guangzhou"
+    "keyOffer": {
+      "content": "Launch Day Special: 50% off for first 100 orders, Exclusive preview access, Free VIP membership for purchases over $200",
+      "lastUpdated": "2023-08-19T16:00:00.000Z"
     },
-    "goals": "Create product awareness, gain media coverage, generate sales leads",
-    "marketingChannels": [
-      "Professional Events",
-      "Press Release",
-      "Social Media"
-    ],
-    "budget": {
-      "amount": 80000,
-      "currency": "USD"
-    },
+    "socialMediaChannels": ["Facebook", "Instagram", "X"],
     "description": "Includes press conference, media interviews, and product demonstrations."
   },
   {
@@ -121,12 +123,5 @@
     "status": "draft",
     "brief": "测试数据持久化功能",
     "createdAt": "2025-04-01T20:11:34.750Z"
-  },
-  {
-    "id": "350d7253-1732-46ee-ba52-aebac420ed83",
-    "title": "刷新后不会消失的活动",
-    "status": "active",
-    "brief": "通过API测试数据持久化功能",
-    "createdAt": "2025-04-01T20:12:22.683Z"
   }
 ]
