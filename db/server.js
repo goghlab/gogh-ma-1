@@ -121,12 +121,13 @@ function readCampaigns() {
       return JSON.parse(data);
     } else {
       // 如果文件不存在，则使用初始数据并写入文件
-      fs.writeFileSync(CAMPAIGNS_FILE, JSON.stringify(initialCampaigns, null, 2), 'utf8');
+      writeCampaigns(initialCampaigns);
       return initialCampaigns;
     }
   } catch (error) {
     console.error('读取活动数据失败:', error);
-    return initialCampaigns;
+    // 如果读取失败，不要返回initialCampaigns，而是返回空数组
+    return [];
   }
 }
 
@@ -143,6 +144,12 @@ function writeCampaigns(campaigns) {
 
 // 初始化活动数据
 let campaigns = readCampaigns();
+
+// 如果是首次运行且没有数据，使用初始数据
+if (campaigns.length === 0 && !fs.existsSync(CAMPAIGNS_FILE)) {
+  campaigns = initialCampaigns;
+  writeCampaigns(campaigns);
+}
 
 // 中间件
 app.use(cors());
@@ -236,21 +243,24 @@ app.patch('/api/campaigns/:id', (req, res) => {
 // API路由 - 删除营销活动
 app.delete('/api/campaigns/:id', (req, res) => {
   try {
-    const campaignIndex = campaigns.findIndex(c => c.id === req.params.id);
+    const campaignId = req.params.id;
+    const campaignIndex = campaigns.findIndex(c => c.id === campaignId);
+    
     if (campaignIndex === -1) {
-      return res.status(404).json({ message: '找不到该活动' });
+      return res.status(404).json({ error: '找不到该活动' });
     }
     
-    const deletedCampaign = campaigns.splice(campaignIndex, 1)[0];
+    // 从数组中移除活动
+    campaigns.splice(campaignIndex, 1);
     
     // 写入文件保存
     const success = writeCampaigns(campaigns);
     if (!success) {
-      return res.status(500).json({ error: '保存活动失败' });
+      console.error('保存活动到文件失败');
+      return res.status(500).json({ error: '删除活动失败' });
     }
     
-    console.log(`成功删除活动ID: ${req.params.id}`);
-    res.json({ message: '活动已删除', campaign: deletedCampaign });
+    res.json({ message: '活动已成功删除' });
   } catch (error) {
     console.error('删除活动失败:', error);
     res.status(500).json({ error: '删除活动失败' });

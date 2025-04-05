@@ -46,25 +46,29 @@ const storageOps = {
     }
   },
 
-  // 删除指定ID的活动
-  deleteCampaign: (id: string): boolean => {
+  // 删除活动
+  deleteCampaign: async (id: string): Promise<boolean> => {
     try {
-      // 获取现有活动
-      const campaigns = storageOps.getCampaigns();
-      // 找到要删除的活动索引
-      const index = campaigns.findIndex(c => c.id === id);
+      console.log(`尝试删除活动ID: ${id}`);
       
-      if (index === -1) {
-        console.error(`找不到ID为 ${id} 的活动`);
-        return false;
+      // 调用后端API删除
+      const response = await fetch(`http://localhost:5000/api/campaigns/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`后端API删除活动失败: ${response.statusText}`);
       }
       
-      // 删除活动
-      campaigns.splice(index, 1);
+      // 从本地存储中删除
+      const campaigns = storageOps.getCampaigns();
+      const updatedCampaigns = campaigns.filter(c => c.id !== id);
+      storageOps.saveCampaigns(updatedCampaigns);
       
-      // 保存更新后的活动列表
-      storageOps.saveCampaigns(campaigns);
-      console.log(`已删除ID为 ${id} 的活动，剩余 ${campaigns.length} 个活动`);
+      console.log(`成功删除活动ID: ${id}`);
       return true;
     } catch (error) {
       console.error('删除活动失败:', error);
@@ -880,7 +884,7 @@ export default function Main() {
                 <CampaignList 
                   campaigns={state.campaigns || []} 
                   onSelectCampaign={(campaign: Campaign) => setSelectedCampaign(campaign)}
-                  onDeleteCampaign={(campaign: Campaign) => {
+                  onDeleteCampaign={async (campaign: Campaign) => {
                     // 确认删除
                     if (window.confirm(`确定要删除"${campaign.title}"吗？`)) {
                       console.log(`UI直接删除活动: ${campaign.title}`);
@@ -890,7 +894,7 @@ export default function Main() {
                         const idToDelete = campaign.id;
                         
                         // 删除活动
-                        const success = storageOps.deleteCampaign(idToDelete);
+                        const success = await storageOps.deleteCampaign(idToDelete);
                         
                         if (!success) {
                           console.error(`UI删除活动 ${campaign.title} 失败`);
