@@ -105,17 +105,17 @@ export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
         <div className="flex items-center mb-6">
           <button 
             onClick={onBack}
-            className="mr-4 p-2 rounded hover:bg-[#35353a] transition-colors"
+            className="mr-4 p-2 rounded hover:bg-[#1a1a1d] transition-colors"
           >
             <ArrowLeft size={20} />
           </button>
           <h2 className="text-xl font-semibold">{displayCampaign.title}</h2>
           <div className={`ml-3 px-2 py-1 text-xs font-medium rounded-full ${
             displayCampaign.status === "draft" 
-              ? "bg-[#494950] text-zinc-200" 
+              ? "bg-[#2a2a2e] text-zinc-300" 
               : displayCampaign.status === "active"
-                ? "bg-green-600 text-white"
-                : "bg-[#5D4EFF] text-white"
+                ? "bg-green-600/80 text-white"
+                : "bg-[#5D4EFF]/80 text-white"
           }`}>
             {displayCampaign.status === 'draft' ? 'Draft' : 
              displayCampaign.status === 'active' ? 'Active' : 'Completed'}
@@ -123,130 +123,36 @@ export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
         </div>
       </div>
       
-      <div className="px-4 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left side campaign information */}
-        <div className="space-y-6">
-          <div className="bg-[#272729] rounded-lg p-5 border border-[#414144]">
-            <h3 className="text-lg font-medium mb-3">Campaign Brief</h3>
-            <p className="text-zinc-300 text-sm">
-              {displayCampaign.brief || displayCampaign.description || 'No brief available'}
-            </p>
-          </div>
-          
-          <div className="bg-[#272729] rounded-lg p-5 border border-[#414144]">
-            <h3 className="text-lg font-medium mb-3">Target Audience</h3>
-            <div className="space-y-3">
-              <div className="flex items-start">
-                <User size={16} className="text-zinc-400 mt-1 mr-2" />
-                <div>
-                  <p className="text-zinc-400 text-xs">Age Range</p>
-                  <p className="text-sm">{displayCampaign.targetAudience?.ageRange || 'All ages'}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <User size={16} className="text-zinc-400 mt-1 mr-2" />
-                <div>
-                  <p className="text-zinc-400 text-xs">Gender</p>
-                  <p className="text-sm">{displayCampaign.targetAudience?.gender || 'All'}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Globe size={16} className="text-zinc-400 mt-1 mr-2" />
-                <div>
-                  <p className="text-zinc-400 text-xs">Location</p>
-                  <p className="text-sm">{displayCampaign.targetAudience?.location || 'Nationwide'}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-[#272729] rounded-lg p-5 border border-[#414144]">
-            <h3 className="text-lg font-medium mb-3">Marketing Channels</h3>
-            <div className="flex flex-wrap gap-2">
-              {displayCampaign.marketingChannels && displayCampaign.marketingChannels.length > 0 ? (
-                displayCampaign.marketingChannels.map((channel: string, index: number) => (
-                  <span 
-                    key={index} 
-                    className="px-2 py-1 bg-[#35353a] text-zinc-300 rounded text-xs"
-                  >
-                    {channel}
-                  </span>
-                ))
-              ) : (
-                <p className="text-zinc-500 text-sm">No marketing channels specified</p>
-              )}
-            </div>
-          </div>
+      <div className="px-4 md:px-10 grid grid-cols-1 gap-6">
+        <div className="bg-[#1a1a1d] rounded-lg p-5 border border-[#2a2a2e]">
+          <h3 className="text-lg font-medium mb-3">Campaign Brief</h3>
+          <p className="text-zinc-300 text-sm">
+            {displayCampaign.brief || displayCampaign.description || 'No brief available'}
+          </p>
         </div>
-        
-        {/* Right side campaign information */}
-        <div className="space-y-6">
-          <div className="bg-[#272729] rounded-lg p-5 border border-[#414144]">
-            <h3 className="text-lg font-medium mb-3">Campaign Goals</h3>
-            <p className="text-zinc-300 text-sm">
-              {displayCampaign.goals || 'No goals specified'}
-            </p>
-          </div>
-          
-          <div className="bg-[#272729] rounded-lg p-5 border border-[#414144]">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-medium">Budget</h3>
-              <div className="flex items-center text-sm">
-                <DollarSign size={16} className="text-zinc-400 mr-1" />
-                <span className="font-medium">
-                  {displayCampaign.budget?.amount ? 
-                    `${displayCampaign.budget.amount} ${displayCampaign.budget.currency || 'USD'}` : 
-                    'Not set'}
+
+        <div className="bg-[#1a1a1d] rounded-lg p-5 border border-[#2a2a2e]">
+          <h3 className="text-lg font-medium mb-3">Campaign Goals</h3>
+          <p className="text-zinc-300 text-sm">
+            {displayCampaign.goals || 'No goals specified'}
+          </p>
+        </div>
+
+        <div className="bg-[#1a1a1d] rounded-lg p-5 border border-[#2a2a2e]">
+          <h3 className="text-lg font-medium mb-3">Marketing Channels</h3>
+          <div className="flex flex-wrap gap-2">
+            {displayCampaign.marketingChannels && displayCampaign.marketingChannels.length > 0 ? (
+              displayCampaign.marketingChannels.map((channel: string, index: number) => (
+                <span 
+                  key={index} 
+                  className="px-2 py-1 bg-[#2a2a2e] text-zinc-300 rounded text-xs"
+                >
+                  {channel}
                 </span>
-              </div>
-            </div>
-            <div className="h-2 bg-[#35353a] rounded overflow-hidden">
-              <div 
-                className="h-full bg-[#5D4EFF]" 
-                style={{ width: '35%' }}
-              />
-            </div>
-            <div className="flex justify-between mt-2 text-xs text-zinc-400">
-              <span>Used: $0</span>
-              <span>Remaining: {displayCampaign.budget?.amount ? `$${displayCampaign.budget.amount}` : '$0'}</span>
-            </div>
-          </div>
-          
-          <div className="bg-[#272729] rounded-lg p-5 border border-[#414144]">
-            <h3 className="text-lg font-medium mb-3">Schedule</h3>
-            <div className="space-y-3">
-              <div className="flex items-start">
-                <Calendar size={16} className="text-zinc-400 mt-1 mr-2" />
-                <div>
-                  <p className="text-zinc-400 text-xs">Created Date</p>
-                  <p className="text-sm">{new Date(displayCampaign.createdAt).toLocaleDateString()}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Calendar size={16} className="text-zinc-400 mt-1 mr-2" />
-                <div>
-                  <p className="text-zinc-400 text-xs">Start Date</p>
-                  <p className="text-sm">{displayCampaign.startDate ? 
-                    new Date(displayCampaign.startDate).toLocaleDateString() : 
-                    'Not set'}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Calendar size={16} className="text-zinc-400 mt-1 mr-2" />
-                <div>
-                  <p className="text-zinc-400 text-xs">End Date</p>
-                  <p className="text-sm">{displayCampaign.endDate ? 
-                    new Date(displayCampaign.endDate).toLocaleDateString() : 
-                    'Not set'}
-                  </p>
-                </div>
-              </div>
-            </div>
+              ))
+            ) : (
+              <p className="text-zinc-500 text-sm">No marketing channels specified</p>
+            )}
           </div>
         </div>
       </div>

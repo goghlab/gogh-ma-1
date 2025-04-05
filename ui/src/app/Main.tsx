@@ -785,7 +785,7 @@ export default function Main() {
                   <div className="flex justify-between items-center mb-2">
                     <h2 className="text-xl font-semibold text-white">Marketing Campaigns</h2>
                     <button 
-                      className="px-3 py-1.5 bg-[#5D4EFF] text-white text-sm rounded-md flex items-center hover:bg-[#4c3fe6] transition-colors"
+                      className="px-3 py-1.5 border border-[#5D4EFF] text-[#5D4EFF] text-sm rounded-md flex items-center hover:bg-[#5D4EFF] hover:text-white transition-all"
                       onClick={async () => {
                         // 创建新活动
                         try {

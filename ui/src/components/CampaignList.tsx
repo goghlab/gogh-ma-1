@@ -25,21 +25,21 @@ function CampaignCard({ campaign, onSelectCampaign, onDeleteCampaign, viewMode }
   };
   
   const gridCard = (
-    <div className="relative group bg-[#272729] rounded-lg border border-[#414144] p-4 hover:border-[#5D4EFF] transition-all">
+    <div className="relative group bg-[#1a1a1d] rounded-lg border border-[#2a2a2e] p-4 hover:border-[#5D4EFF] transition-all">
       <div className="flex justify-between items-start mb-3">
         <div className={`px-2 py-1 text-xs font-medium rounded-full ${
           campaign.status === "draft" 
-            ? "bg-[#494950] text-zinc-200" 
+            ? "bg-[#2a2a2e] text-zinc-300" 
             : campaign.status === "active"
-              ? "bg-green-600 text-white"
-              : "bg-[#5D4EFF] text-white"
+              ? "bg-green-600/80 text-white"
+              : "bg-[#5D4EFF]/80 text-white"
         }`}>
           {campaign.status === 'draft' ? 'Draft' : 
            campaign.status === 'active' ? 'Active' : 'Completed'}
         </div>
         <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button 
-            className="p-1 rounded hover:bg-[#35353a]" 
+            className="p-1 rounded hover:bg-[#2a2a2e]" 
             title="Edit Campaign"
             onClick={() => onSelectCampaign && onSelectCampaign(campaign)}
           >
@@ -47,7 +47,7 @@ function CampaignCard({ campaign, onSelectCampaign, onDeleteCampaign, viewMode }
           </button>
           {onDeleteCampaign && (
             <button 
-              className="p-1 rounded hover:bg-[#35353a]" 
+              className="p-1 rounded hover:bg-[#2a2a2e]" 
               title="Delete Campaign"
               onClick={() => {
                 if (window.confirm(`Are you sure you want to delete "${campaign.title}"?`)) {
@@ -76,15 +76,15 @@ function CampaignCard({ campaign, onSelectCampaign, onDeleteCampaign, viewMode }
   );
   
   const listCard = (
-    <div className="relative group bg-[#272729] rounded-lg border border-[#414144] p-3 hover:border-[#5D4EFF] transition-all">
+    <div className="relative group bg-[#1a1a1d] rounded-lg border border-[#2a2a2e] p-3 hover:border-[#5D4EFF] transition-all">
       <div className="flex justify-between items-center">
         <div className="flex items-center">
           <div className={`mr-3 px-2 py-1 text-xs font-medium rounded-full ${
             campaign.status === "draft" 
-              ? "bg-[#494950] text-zinc-200" 
+              ? "bg-[#2a2a2e] text-zinc-300" 
               : campaign.status === "active"
-                ? "bg-green-600 text-white"
-                : "bg-[#5D4EFF] text-white"
+                ? "bg-green-600/80 text-white"
+                : "bg-[#5D4EFF]/80 text-white"
           }`}>
             {campaign.status === 'draft' ? 'Draft' : 
              campaign.status === 'active' ? 'Active' : 'Completed'}
@@ -100,7 +100,7 @@ function CampaignCard({ campaign, onSelectCampaign, onDeleteCampaign, viewMode }
           <div className="text-xs text-zinc-500 mr-3">Created {formatDate(campaign.createdAt)}</div>
           <div className="flex space-x-1">
             <button 
-              className="p-1 rounded hover:bg-[#35353a]" 
+              className="p-1 rounded hover:bg-[#2a2a2e]" 
               title="Edit Campaign"
               onClick={() => onSelectCampaign && onSelectCampaign(campaign)}
             >
@@ -108,7 +108,7 @@ function CampaignCard({ campaign, onSelectCampaign, onDeleteCampaign, viewMode }
             </button>
             {onDeleteCampaign && (
               <button 
-                className="p-1 rounded hover:bg-[#35353a]" 
+                className="p-1 rounded hover:bg-[#2a2a2e]" 
                 title="Delete Campaign"
                 onClick={() => {
                   if (window.confirm(`Are you sure you want to delete "${campaign.title}"?`)) {
