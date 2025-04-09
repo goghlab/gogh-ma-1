@@ -2,31 +2,47 @@
   {
     "id": "02f0dc6c-cc8c-4ccb-b4b8-4b7f4225de62",
     "title": "Summer New Product Promotion",
-    "status": "active",
+    "status": "draft",
     "brief": "Promote our new summer product line, aiming to increase sales and brand exposure.",
     "createdAt": "2023-05-14T16:00:00.000Z",
     "keyOffer": {
       "content": "Summer Flash Sale: 30% off on new arrivals, Limited time offer: Free beach bag with purchases over $100",
       "lastUpdated": "2023-05-14T16:00:00.000Z"
     },
-    "socialMediaChannels": ["Facebook", "Instagram", "X"],
+    "socialMediaChannels": [
+      "Facebook",
+      "Instagram",
+      "X"
+    ],
     "campaignBlueprint": {
       "facebook": {
         "posts": [
           {
             "type": "post",
             "content": "🌟 Summer Sale is Here!\n\nSpecial Offer: 20% OFF storewide, plus extra 15% OFF on new arrivals.\n\nCome find your perfect summer items!",
-            "hashtags": ["SummerSale", "NewCollection", "Fashion"],
+            "hashtags": [
+              "SummerSale",
+              "NewCollection",
+              "Fashion"
+            ],
             "mediaUrl": null,
             "mediaType": "image",
+            "scheduledTime": null,
+            "status": "draft",
             "lastEdited": "2023-05-14T16:00:00.000Z"
           },
           {
             "type": "post",
             "content": "✨ Exclusive Deal!\n\nGet a FREE luxury gift with purchases over $100\n\nLimited quantity, shop now!",
-            "hashtags": ["ExclusiveOffer", "GiftWithPurchase", "LimitedTime"],
+            "hashtags": [
+              "ExclusiveOffer",
+              "GiftWithPurchase",
+              "LimitedTime"
+            ],
             "mediaUrl": null,
             "mediaType": "image",
+            "scheduledTime": null,
+            "status": "draft",
             "lastEdited": "2023-05-14T16:00:00.000Z"
           }
         ]
@@ -36,17 +52,28 @@
           {
             "type": "post",
             "content": "✨ Cool Summer Vibes!\n\nNew arrivals in store\n\nLimited Time: 15% OFF on all new items",
-            "hashtags": ["SummerFashion", "NewArrivals", "Style"],
+            "hashtags": [
+              "SummerFashion",
+              "NewArrivals",
+              "Style"
+            ],
             "mediaUrl": null,
             "mediaType": "image",
+            "scheduledTime": null,
+            "status": "draft",
             "lastEdited": "2023-05-14T16:00:00.000Z"
           },
           {
             "type": "reel",
             "content": "👗 Style Tips\n\nSummer Collection Styling Guide\n\nSwipe to see the perfect summer looks!",
-            "hashtags": ["StyleGuide", "FashionTips"],
+            "hashtags": [
+              "StyleGuide",
+              "FashionTips"
+            ],
             "mediaUrl": null,
             "mediaType": "video",
+            "scheduledTime": null,
+            "status": "draft",
             "lastEdited": "2023-05-14T16:00:00.000Z"
           }
         ]
@@ -56,9 +83,14 @@
           {
             "type": "post",
             "content": "🎉 Summer Collection is LIVE! Limited time offers, shop now before they're gone!",
-            "hashtags": ["SummerCollection", "Fashion"],
+            "hashtags": [
+              "SummerCollection",
+              "Fashion"
+            ],
             "mediaUrl": null,
             "mediaType": "image",
+            "scheduledTime": null,
+            "status": "draft",
             "lastEdited": "2023-05-14T16:00:00.000Z"
           }
         ]
@@ -72,24 +104,140 @@
     "brief": "Establish a loyalty program for existing customers to encourage repeat purchases and improve retention rates.",
     "createdAt": "2023-06-09T16:00:00.000Z",
     "keyOffer": {
-      "content": "Member exclusive: 25% off first purchase, Double points on all transactions, Free premium membership upgrade for first 500 sign-ups",
+      "content": "Member exclusive: 25% off first purchase, Double points on all transactions",
       "lastUpdated": "2023-06-09T16:00:00.000Z"
     },
-    "socialMediaChannels": ["Facebook", "Instagram", "X"],
-    "description": "Provide special discounts, priority purchase rights, and exclusive events for loyal customers."
+    "socialMediaChannels": [
+      "Facebook",
+      "Instagram",
+      "X"
+    ],
+    "campaignBlueprint": {
+      "facebook": {
+        "posts": [
+          {
+            "type": "post",
+            "content": "🌟 Introducing Our New Member Loyalty Program!\n\nExclusive Benefits:\n- 25% OFF your first purchase\n- Double points on all transactions\n- Early access to sales\n\nJoin now and start earning rewards!",
+            "hashtags": [
+              "MemberRewards",
+              "LoyaltyProgram",
+              "ExclusiveOffers"
+            ],
+            "mediaUrl": null,
+            "mediaType": "image",
+            "scheduledTime": null,
+            "status": "draft",
+            "lastEdited": "2023-06-09T16:00:00.000Z"
+          }
+        ]
+      },
+      "instagram": {
+        "posts": [
+          {
+            "type": "post",
+            "content": "✨ Become a VIP Member Today!\n\nUnlock exclusive benefits and start saving with our new loyalty program.",
+            "hashtags": [
+              "MemberBenefits",
+              "VIPProgram",
+              "ExclusiveDeals"
+            ],
+            "mediaUrl": null,
+            "mediaType": "image",
+            "scheduledTime": null,
+            "status": "draft",
+            "lastEdited": "2023-06-09T16:00:00.000Z"
+          }
+        ]
+      },
+      "x": {
+        "posts": [
+          {
+            "type": "post",
+            "content": "🎉 Join our Member Loyalty Program and get 25% OFF your first purchase! Plus, earn double points on all transactions. Limited time offer!",
+            "hashtags": [
+              "MemberRewards",
+              "ShopAndSave"
+            ],
+            "mediaUrl": null,
+            "mediaType": "image",
+            "scheduledTime": null,
+            "status": "draft",
+            "lastEdited": "2023-06-09T16:00:00.000Z"
+          }
+        ]
+      }
+    }
   },
   {
     "id": "0efc0194-6a22-4abc-a96c-8f70aaa69790",
     "title": "Content Marketing Strategy",
-    "status": "completed",
+    "status": "draft",
     "brief": "Create high-quality content to attract new audiences and establish our professional image in the industry.",
     "createdAt": "2023-04-21T16:00:00.000Z",
     "keyOffer": {
-      "content": "Flash Deal: Buy 2 Get 1 Free, Special Bundle Offers: Save up to 40%, Seasonal Clearance: Additional 15% off on sale items",
+      "content": "Free style guide download, Expert fashion tips and trends",
       "lastUpdated": "2023-04-21T16:00:00.000Z"
     },
-    "socialMediaChannels": ["Facebook", "Instagram", "X"],
-    "description": "Create and distribute valuable content relevant to target audience."
+    "socialMediaChannels": [
+      "Facebook",
+      "Instagram",
+      "X"
+    ],
+    "campaignBlueprint": {
+      "facebook": {
+        "posts": [
+          {
+            "type": "post",
+            "content": "📚 Download Our Free Style Guide!\n\nGet expert fashion tips and discover the latest trends.\n\nClick the link in bio to get your copy now!",
+            "hashtags": [
+              "StyleGuide",
+              "FashionTips",
+              "TrendAlert"
+            ],
+            "mediaUrl": null,
+            "mediaType": "image",
+            "scheduledTime": null,
+            "status": "draft",
+            "lastEdited": "2023-04-21T16:00:00.000Z"
+          }
+        ]
+      },
+      "instagram": {
+        "posts": [
+          {
+            "type": "reel",
+            "content": "👗 3 Ways to Style Your Summer Wardrobe\n\nSwipe for more fashion tips and download our free style guide!",
+            "hashtags": [
+              "StyleTips",
+              "FashionGuide",
+              "SummerStyle"
+            ],
+            "mediaUrl": null,
+            "mediaType": "video",
+            "scheduledTime": null,
+            "status": "draft",
+            "lastEdited": "2023-04-21T16:00:00.000Z"
+          }
+        ]
+      },
+      "x": {
+        "posts": [
+          {
+            "type": "post",
+            "content": "🎯 Want to stay ahead of the fashion curve? Download our free style guide packed with expert tips and trend forecasts!",
+            "hashtags": [
+              "FashionGuide",
+              "StyleTips"
+            ],
+            "mediaUrl": null,
+            "mediaType": "image",
+            "scheduledTime": null,
+            "status": "draft",
+            "lastEdited": "2023-04-21T16:00:00.000Z"
+          }
+        ]
+      }
+    }
   },
   {
     "id": "9f4f26cd-9851-4319-b703-8eec9d9f6b9a",
@@ -101,7 +249,11 @@
       "content": "Holiday Special: 40% off on all items, Free gift wrapping service, Same-day delivery for orders before 3PM",
       "lastUpdated": "2023-07-04T16:00:00.000Z"
     },
-    "socialMediaChannels": ["Facebook", "Instagram", "X"],
+    "socialMediaChannels": [
+      "Facebook",
+      "Instagram",
+      "X"
+    ],
     "description": "Holiday limited-time offers, including special gift wrapping and delivery options."
   },
   {
@@ -114,7 +266,11 @@
       "content": "Launch Day Special: 50% off for first 100 orders, Exclusive preview access, Free VIP membership for purchases over $200",
       "lastUpdated": "2023-08-19T16:00:00.000Z"
     },
-    "socialMediaChannels": ["Facebook", "Instagram", "X"],
+    "socialMediaChannels": [
+      "Facebook",
+      "Instagram",
+      "X"
+    ],
     "description": "Includes press conference, media interviews, and product demonstrations."
   },
   {

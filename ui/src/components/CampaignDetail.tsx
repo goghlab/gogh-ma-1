@@ -80,6 +80,20 @@ export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
   const [fullCampaign, setFullCampaign] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isBlueprintOpen, setIsBlueprintOpen] = useState(false);
+  const [isGeneratingBlueprint, setIsGeneratingBlueprint] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isEditing, setIsEditing] = useState({
+    brief: false,
+    keyOffer: false,
+    channels: false
+  });
+  const [editValues, setEditValues] = useState({
+    brief: '',
+    keyOffer: '',
+    channels: [] as string[]
+  });
+  const blueprintRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (campaign) {
@@ -100,28 +114,91 @@ export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
         };
         
         setFullCampaign(mergedData);
-        setLoading(false);
-      }, 500); // Add 500ms delay to simulate network request
-
-      /* Commented out original API call code
-      fetch(`http://localhost:5000/api/campaigns/${campaign.id}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Error: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          setFullCampaign(data);
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Error fetching campaign details:', error);
-          setLoading(false);
+        setEditValues({
+          brief: mergedData.campaignBrief?.content || '',
+          keyOffer: mergedData.keyOffer?.content || '',
+          channels: mergedData.marketingChannels?.channels || []
         });
-      */
+        setLoading(false);
+      }, 500);
     }
   }, [campaign]);
+
+  // Add new useEffect to handle blueprint generation
+  useEffect(() => {
+    if (isBlueprintOpen) {
+      // If any section is being edited, save it
+      if (isEditing.brief) handleSave('brief');
+      if (isEditing.keyOffer) handleSave('keyOffer');
+      if (isEditing.channels) handleSave('channels');
+      
+      // Reset all editing states
+      setIsEditing({
+        brief: false,
+        keyOffer: false,
+        channels: false
+      });
+    }
+  }, [isBlueprintOpen]);
+
+  const handleSave = (field: 'brief' | 'keyOffer' | 'channels') => {
+    if (fullCampaign) {
+      const updatedCampaign = { ...fullCampaign };
+      const now = new Date().toISOString();
+
+      switch (field) {
+        case 'brief':
+          updatedCampaign.campaignBrief = {
+            content: editValues.brief,
+            lastUpdated: now
+          };
+          break;
+        case 'keyOffer':
+          updatedCampaign.keyOffer = {
+            content: editValues.keyOffer,
+            lastUpdated: now
+          };
+          break;
+        case 'channels':
+          updatedCampaign.marketingChannels = {
+            channels: editValues.channels,
+            lastUpdated: now
+          };
+          break;
+      }
+
+      setFullCampaign(updatedCampaign);
+      setIsEditing({ ...isEditing, [field]: false });
+    }
+  };
+
+  const handleBlueprintAction = () => {
+    if (isBlueprintOpen) {
+      setShowDeleteConfirm(true);
+    } else {
+      setIsGeneratingBlueprint(true);
+      // Simulate API call to generate blueprint
+      setTimeout(() => {
+        setIsGeneratingBlueprint(false);
+        setIsBlueprintOpen(true);
+        // Add smooth scroll after blueprint is generated
+        setTimeout(() => {
+          blueprintRef.current?.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }, 100);
+      }, 2000);
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteConfirmText.toLowerCase() === 'delete') {
+      setIsBlueprintOpen(false);
+      setShowDeleteConfirm(false);
+      setDeleteConfirmText('');
+    }
+  };
 
   if (!campaign) {
     return (
@@ -158,7 +235,7 @@ export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
               ? "bg-[#2a2a2e] text-zinc-300" 
               : displayCampaign.status === "active"
                 ? "bg-green-600/80 text-white"
-                : "bg-[#5D4EFF]/80 text-white"
+                : "bg-[#1a1a1d] text-white"
           }`}>
             {displayCampaign.status === 'draft' ? 'Draft' : 
              displayCampaign.status === 'active' ? 'Active' : 'Completed'}
@@ -170,66 +247,235 @@ export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
         <div className="bg-[#1a1a1d] rounded-lg p-5 border border-[#2a2a2e]">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Campaign Brief</h3>
-            <span className="text-xs text-zinc-500">
-              Last updated: {displayCampaign.campaignBrief?.lastUpdated ? 
-                new Date(displayCampaign.campaignBrief.lastUpdated).toLocaleDateString() : 
-                'Not available'}
-            </span>
+            <div className="flex items-center space-x-4">
+              <span className="text-xs text-zinc-500">
+                Last updated: {displayCampaign.campaignBrief?.lastUpdated ? 
+                  new Date(displayCampaign.campaignBrief.lastUpdated).toLocaleDateString() : 
+                  'Not available'}
+              </span>
+              <button 
+                onClick={() => {
+                  if (isEditing.brief) {
+                    handleSave('brief');
+                  } else {
+                    setIsEditing({ ...isEditing, brief: true });
+                    setEditValues({ ...editValues, brief: displayCampaign.campaignBrief?.content || '' });
+                  }
+                }}
+                disabled={isBlueprintOpen}
+                className={`text-xs px-2 py-1 rounded transition-colors ${
+                  isBlueprintOpen 
+                    ? "bg-[#1e1e20] text-zinc-500 cursor-not-allowed" 
+                    : "bg-[#2a2a2e] text-zinc-300 hover:bg-[#35353a]"
+                }`}
+              >
+                {isEditing.brief ? 'Save' : 'Edit'}
+              </button>
+            </div>
           </div>
-          <p className="text-zinc-300 text-sm">
-            {displayCampaign.campaignBrief?.content || 'No brief available'}
-          </p>
+          {isEditing.brief ? (
+            <textarea
+              value={editValues.brief}
+              onChange={(e) => setEditValues({ ...editValues, brief: e.target.value })}
+              className="w-full bg-[#2a2a2e] text-zinc-300 text-sm p-3 rounded border border-[#414144] focus:outline-none focus:border-[#5D4EFF]"
+              rows={4}
+              placeholder="Enter campaign brief..."
+            />
+          ) : (
+            <p className="text-zinc-300 text-sm">
+              {displayCampaign.campaignBrief?.content || 'No brief available'}
+            </p>
+          )}
         </div>
 
         <div className="bg-[#1a1a1d] rounded-lg p-5 border border-[#2a2a2e]">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Key Offer</h3>
-            <span className="text-xs text-zinc-500">
-              Last updated: {displayCampaign.keyOffer?.lastUpdated ? 
-                new Date(displayCampaign.keyOffer.lastUpdated).toLocaleDateString() : 
-                'Not available'}
-            </span>
+            <div className="flex items-center space-x-4">
+              <span className="text-xs text-zinc-500">
+                Last updated: {displayCampaign.keyOffer?.lastUpdated ? 
+                  new Date(displayCampaign.keyOffer.lastUpdated).toLocaleDateString() : 
+                  'Not available'}
+              </span>
+              <button 
+                onClick={() => {
+                  if (isEditing.keyOffer) {
+                    handleSave('keyOffer');
+                  } else {
+                    setIsEditing({ ...isEditing, keyOffer: true });
+                    setEditValues({ ...editValues, keyOffer: displayCampaign.keyOffer?.content || '' });
+                  }
+                }}
+                disabled={isBlueprintOpen}
+                className={`text-xs px-2 py-1 rounded transition-colors ${
+                  isBlueprintOpen 
+                    ? "bg-[#1e1e20] text-zinc-500 cursor-not-allowed" 
+                    : "bg-[#2a2a2e] text-zinc-300 hover:bg-[#35353a]"
+                }`}
+              >
+                {isEditing.keyOffer ? 'Save' : 'Edit'}
+              </button>
+            </div>
           </div>
-          <p className="text-zinc-300 text-sm">
-            {displayCampaign.keyOffer?.content || 'No key offer specified'}
-          </p>
+          {isEditing.keyOffer ? (
+            <textarea
+              value={editValues.keyOffer}
+              onChange={(e) => setEditValues({ ...editValues, keyOffer: e.target.value })}
+              className="w-full bg-[#2a2a2e] text-zinc-300 text-sm p-3 rounded border border-[#414144] focus:outline-none focus:border-[#5D4EFF]"
+              rows={4}
+              placeholder="Enter key offer..."
+            />
+          ) : (
+            <p className="text-zinc-300 text-sm">
+              {displayCampaign.keyOffer?.content || 'No key offer specified'}
+            </p>
+          )}
         </div>
 
         <div className="bg-[#1a1a1d] rounded-lg p-5 border border-[#2a2a2e]">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Social Media Channels</h3>
-            <span className="text-xs text-zinc-500">
-              Last updated: {displayCampaign.marketingChannels?.lastUpdated ? 
-                new Date(displayCampaign.marketingChannels.lastUpdated).toLocaleDateString() : 
-                'Not available'}
-            </span>
+            <div className="flex items-center space-x-4">
+              <span className="text-xs text-zinc-500">
+                Last updated: {displayCampaign.marketingChannels?.lastUpdated ? 
+                  new Date(displayCampaign.marketingChannels.lastUpdated).toLocaleDateString() : 
+                  'Not available'}
+              </span>
+              <button 
+                onClick={() => {
+                  if (isEditing.channels) {
+                    handleSave('channels');
+                  } else {
+                    setIsEditing({ ...isEditing, channels: true });
+                    setEditValues({ ...editValues, channels: displayCampaign.marketingChannels?.channels || [] });
+                  }
+                }}
+                disabled={isBlueprintOpen}
+                className={`text-xs px-2 py-1 rounded transition-colors ${
+                  isBlueprintOpen 
+                    ? "bg-[#1e1e20] text-zinc-500 cursor-not-allowed" 
+                    : "bg-[#2a2a2e] text-zinc-300 hover:bg-[#35353a]"
+                }`}
+              >
+                {isEditing.channels ? 'Save' : 'Edit'}
+              </button>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {displayCampaign.marketingChannels?.channels && displayCampaign.marketingChannels.channels.length > 0 ? (
-              displayCampaign.marketingChannels.channels.map((channel: string, index: number) => (
-                <span 
-                  key={index} 
-                  className="px-2 py-1 bg-[#2a2a2e] text-zinc-300 rounded text-xs"
-                >
-                  {channel}
-                </span>
-              ))
-            ) : (
-              <p className="text-zinc-500 text-sm">No social media channels specified</p>
+          {isEditing.channels ? (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {['Facebook', 'Instagram', 'X'].map((channel) => (
+                  <button
+                    key={channel}
+                    onClick={() => {
+                      const currentChannels = editValues.channels;
+                      if (currentChannels.includes(channel)) {
+                        setEditValues({
+                          ...editValues,
+                          channels: currentChannels.filter(ch => ch !== channel)
+                        });
+                      } else {
+                        setEditValues({
+                          ...editValues,
+                          channels: [...currentChannels, channel]
+                        });
+                      }
+                    }}
+                    className={`px-2 py-1 rounded text-xs transition-colors ${
+                      editValues.channels.includes(channel)
+                        ? 'bg-[#5D4EFF] text-white'
+                        : 'bg-[#2a2a2e] text-zinc-300 hover:bg-[#35353a]'
+                    }`}
+                  >
+                    {channel}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {displayCampaign.marketingChannels?.channels && displayCampaign.marketingChannels.channels.length > 0 ? (
+                displayCampaign.marketingChannels.channels.map((channel: string, index: number) => (
+                  <span 
+                    key={index} 
+                    className="px-2 py-1 bg-[#2a2a2e] text-zinc-300 rounded text-xs"
+                  >
+                    {channel}
+                  </span>
+                ))
+              ) : (
+                <p className="text-zinc-500 text-sm">No social media channels specified</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-center mt-6">
+          <div className="relative">
+            <button 
+              className={`px-6 py-3 border-2 rounded-lg transition-all duration-200 font-medium ${
+                isBlueprintOpen 
+                  ? "bg-transparent border-[#5D4EFF] text-[#5D4EFF] hover:bg-[#5D4EFF] hover:text-white" 
+                  : "bg-white border-[#1a1a1d] text-[#1a1a1d] hover:bg-[#1a1a1d] hover:text-white"
+              }`}
+              onClick={handleBlueprintAction}
+              disabled={isGeneratingBlueprint}
+            >
+              {isGeneratingBlueprint ? (
+                <div className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#1a1a1d]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Generating Blueprint...
+                </div>
+              ) : isBlueprintOpen ? (
+                'Delete Blueprint'
+              ) : (
+                'Generate Campaign Blueprint'
+              )}
+            </button>
+            
+            {showDeleteConfirm && (
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-4 p-4 bg-[#1a1a1d] border border-[#2a2a2e] rounded-lg shadow-lg w-80">
+                <p className="text-sm text-zinc-300 mb-3">Please type "delete" to confirm deletion</p>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  className="w-full bg-[#2a2a2e] text-zinc-300 text-sm p-2 rounded border border-[#414144] focus:outline-none focus:border-[#5D4EFF] mb-3"
+                  placeholder="Type 'delete' to confirm"
+                />
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setDeleteConfirmText('');
+                    }}
+                    className="px-3 py-1 text-sm text-zinc-300 hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    disabled={deleteConfirmText.toLowerCase() !== 'delete'}
+                    className={`px-3 py-1 text-sm rounded ${
+                      deleteConfirmText.toLowerCase() === 'delete'
+                        ? 'bg-[#5D4EFF] text-white hover:bg-[#4B3ECC]'
+                        : 'bg-[#2a2a2e] text-zinc-500 cursor-not-allowed'
+                    }`}
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>
 
-        <div className="flex justify-center mt-6">
-          <button 
-            className="px-6 py-3 border-2 border-[#5D4EFF] text-[#5D4EFF] rounded-lg hover:bg-[#5D4EFF] hover:text-white transition-all duration-200 font-medium"
-            onClick={() => setIsBlueprintOpen(!isBlueprintOpen)}
-          >
-            {isBlueprintOpen ? 'Hide Campaign Blueprint' : 'Generate Campaign Blueprint'}
-          </button>
+        <div ref={blueprintRef}>
+          <CampaignBlueprint isOpen={isBlueprintOpen} />
         </div>
-
-        <CampaignBlueprint isOpen={isBlueprintOpen} />
       </div>
     </div>
   );

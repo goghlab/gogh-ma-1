@@ -38,6 +38,16 @@ export interface SocialPost {
   content: string;
   hashtags: string[];
   suggestedImage?: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  scheduledTime?: string;
+  published?: boolean;
+  link?: string;
+  // Meta API specific fields
+  mediaContainerId?: string;  // For Instagram media container
+  postId?: string;           // ID of the created post
+  status?: 'draft' | 'scheduled' | 'published' | 'failed';
+  errorMessage?: string;     // In case of posting failure
 }
 
 export interface CampaignBlueprint {

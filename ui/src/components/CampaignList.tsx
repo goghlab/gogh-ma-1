@@ -84,7 +84,7 @@ function CampaignCard({ campaign, onSelectCampaign, onDeleteCampaign, viewMode }
               ? "bg-[#2a2a2e] text-zinc-300" 
               : campaign.status === "active"
                 ? "bg-green-600/80 text-white"
-                : "bg-[#5D4EFF]/80 text-white"
+                : "bg-[#1a1a1d] text-white"
           }`}>
             {campaign.status === 'draft' ? 'Draft' : 
              campaign.status === 'active' ? 'Active' : 'Completed'}
